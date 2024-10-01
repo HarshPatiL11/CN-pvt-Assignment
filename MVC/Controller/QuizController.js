@@ -1,0 +1,152 @@
+import Questions from "../Model/Questions.js";
+import User from "../Model/UserModel.js";
+
+// Add Questions
+export const addQuizQuestions = async (req, res) => {
+  const { questionText, options, correctAnswer, topic } = req.body;
+
+  try {
+    if (!questionText || typeof questionText !== "string") {
+      return res
+        .status(400)
+        .send({ success: false, message: "Enter the Question" });
+    }
+    if (!options || !Array.isArray(options) || options.length === 0) {
+      return res
+        .status(400)
+        .send({
+          success: false,
+          message: "Enter The Options for The Question",
+        });
+    }
+    if (!correctAnswer || typeof correctAnswer !== "string") {
+      return res
+        .status(400)
+        .send({ success: false, message: "Enter the Correct Option" });
+    }
+    if (!topic || typeof topic !== "string") {
+      return res
+        .status(400)
+        .send({ success: false, message: "Enter the Subject" });
+    }
+
+    const newQuestion = await Questions.create({
+      questionText,
+      options,
+      correctAnswer,
+      topic,
+    });
+
+    return res.status(201).send({
+      success: true,
+      message: `Successfully added question "${questionText}" for Topic "${topic}"`,
+      newQuestion,
+    });
+  } catch (error) {
+    console.error("Error in addQuizQuestions API:", error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in addQuizQuestions API",
+      error: error.message,
+    });
+  }
+};
+
+// Get questions by topic
+export const getQuizQuestionsByTopic = async (req, res) => {
+  const { topic } = req.params;
+
+  try {
+    if (!topic) {
+      return res
+        .status(404)
+        .send({ success: false, message: "No Topic provided" });
+    }
+
+    const questions = await Questions.find({ topic }).limit(10);
+
+    if (!questions || questions.length === 0) {
+      return res
+        .status(404)
+        .send({
+          success: false,
+          message: `No questions found for the Topic "${topic}"`,
+        });
+    }
+
+    return res.status(200).send({
+      success: true,
+      questions,
+      message: "Questions fetched successfully",
+    });
+  } catch (error) {
+    console.error("Error in getQuizQuestionsByTopic API:", error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in getQuizQuestionsByTopic API",
+      error: error.message,
+    });
+  }
+};
+
+// Calculate score
+export const calculateScore = async (req, res) => {
+  const { submittedAnswers } = req.body;
+  const userId = req.userId;
+
+  let score = 0;
+
+  try {
+    // Validation for required fields
+    if (
+      !submittedAnswers ||
+      !Array.isArray(submittedAnswers) ||
+      submittedAnswers.length === 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "submittedAnswers is required and should be a non-empty array",
+      });
+    }
+
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "userId is required" });
+    }
+
+    // Using for...of to handle async/await properly
+    for (const { questionId, answer } of submittedAnswers) {
+      const question = await Questions.findById(questionId);
+
+      if (!question) {
+        return res.status(404).json({
+          success: false,
+          message: `Question not found for id: ${questionId}`,
+        });
+      }
+
+      // Compare submitted answer with the correct answer
+      if (question.correctAnswer === answer) {
+        score++;
+      }
+    }
+
+    // Update the user's score in the database
+    await User.findByIdAndUpdate(userId, { $inc: { score } }); // Increment score
+
+    // Respond with the calculated score
+    return res.json({
+      success: true,
+      message: "Score calculated successfully",
+      score,
+    });
+  } catch (error) {
+    console.error("Error in calculateScore API:", error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in calculateScore API",
+      error: error.message,
+    });
+  }
+};

@@ -1,0 +1,177 @@
+import User from "../Model/UserModel.js";
+import { comparePassword, hashPassword } from "../Helpers/AuthHelper.js";
+import jwt from "jsonwebtoken";
+
+// Register a new user
+export const registerUser = async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    // Validate inputs
+    if (!name || typeof name !== "string") {
+      return res
+        .status(400)
+        .send({ success: false, message: "Enter a valid Name" });
+    }
+    if (!email || typeof email !== "string") {
+      return res
+        .status(400)
+        .send({ success: false, message: "Enter a valid Email" });
+    }
+    if (!password || typeof password !== "string") {
+      return res
+        .status(400)
+        .send({ success: false, message: "Enter a valid Password" });
+    }
+
+    let user = await User.findOne({ email });
+    if (user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User already exists" });
+    }
+
+    const hashedPassword = await hashPassword(password);
+    user = new User({ name, email, password: hashedPassword });
+    await user.save();
+
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+    });
+  } catch (error) {
+    console.error("Error in registerUser API:", error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in registerUser API",
+      error: error.message,
+    });
+  }
+};
+
+// User login
+export const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    if (!email || typeof email !== "string") {
+      return res
+        .status(400)
+        .send({ success: false, message: "Enter a valid Email" });
+    }
+    if (!password || typeof password !== "string") {
+      return res
+        .status(400)
+        .send({ success: false, message: "Enter a valid Password" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .send({ success: false, message: "User not found" });
+    }
+
+    const isMatch = await comparePassword(password, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .send({ success: false, message: "Incorrect password" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "4h",
+      }
+    );
+    user.password = undefined; // Exclude password from response
+
+    return res.status(200).send({
+      success: true,
+      message: "User logged in successfully",
+      token,
+      user,
+    });
+  } catch (error) {
+    console.error("Error in loginUser API:", error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in loginUser API",
+      error: error.message,
+    });
+  }
+};
+
+// Select Topics for User
+export const selectTopics = async (req, res) => {
+  const { topics } = req.body;
+  const userId = req.userId;
+  try {
+    // Validate inputs
+    if (!userId || typeof userId !== "string") {
+      return res
+        .status(400)
+        .send({ success: false, message: "Invalid userId" });
+    }
+    if (!topics || !Array.isArray(topics)) {
+      return res
+        .status(400)
+        .send({ success: false, message: "Invalid topics array" });
+    }
+
+    const chkUser = await User.findById(userId);
+    if (!chkUser) {
+      return res
+        .status(404)
+        .send({ success: false, message: "User not found" });
+    }
+
+    await User.findByIdAndUpdate(userId, { selectedTopics: topics });
+    res.status(200).send({ success: true, message: "Topics selected" });
+  } catch (error) {
+    console.error("Error in selectTopics API:", error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in selectTopics API",
+      error: error.message,
+    });
+  }
+};
+
+// Get score list by topic
+export const getScoreListByTopic = async (req, res) => {
+  const { topic } = req.params;
+
+  try {
+    // Validate topic input
+    if (!topic || typeof topic !== "string") {
+      return res.status(400).send({ success: false, message: "Invalid topic" });
+    }
+
+    // Fetch users who have selected this topic and have scores
+    const users = await User.find({ selectedTopics: topic }, "name scores");
+
+    // Check if users exist
+    if (!users || users.length === 0) {
+      return res.status(404).send({
+        success: false,
+        message: `No scores found for topic (${topic})`,
+      });
+    }
+
+    res.status(200).send({
+      success: true,
+      scores: users,
+      message: `Score list for the topic (${topic}) fetched successfully`,
+    });
+  } catch (error) {
+    console.error("Error in getScoreListByTopic API:", error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in getScoreListByTopic API",
+      error: error.message,
+    });
+  }
+};
