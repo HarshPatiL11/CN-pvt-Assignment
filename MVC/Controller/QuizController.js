@@ -1,16 +1,30 @@
 import Questions from "../Model/Questions.js";
 import User from "../Model/UserModel.js";
 
+// Enum for topics
+const VALID_TOPICS = [
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "I.T",
+  "Maths",
+  "English",
+  "Marathi",
+];
+
 // Add Questions
 export const addQuizQuestions = async (req, res) => {
   const { questionText, options, correctAnswer, topic } = req.body;
 
   try {
+    // Validate questionText
     if (!questionText || typeof questionText !== "string") {
       return res
         .status(400)
         .send({ success: false, message: "Enter the Question" });
     }
+
+    // Validate options
     if (!options || !Array.isArray(options) || options.length === 0) {
       return res
         .status(400)
@@ -19,17 +33,27 @@ export const addQuizQuestions = async (req, res) => {
           message: "Enter The Options for The Question",
         });
     }
+
+    // Validate correctAnswer
     if (!correctAnswer || typeof correctAnswer !== "string") {
       return res
         .status(400)
         .send({ success: false, message: "Enter the Correct Option" });
     }
-    if (!topic || typeof topic !== "string") {
+
+    // Validate topic
+    if (!topic || !VALID_TOPICS.includes(topic)) {
       return res
         .status(400)
-        .send({ success: false, message: "Enter the Subject" });
+        .send({
+          success: false,
+          message: `Enter a valid Subject. Valid subjects are: ${VALID_TOPICS.join(
+            ", "
+          )}`,
+        });
     }
 
+    // Create new question
     const newQuestion = await Questions.create({
       questionText,
       options,
@@ -57,10 +81,11 @@ export const getQuizQuestionsByTopic = async (req, res) => {
   const { topic } = req.params;
 
   try {
-    if (!topic) {
+    // Validate topic
+    if (!topic || !VALID_TOPICS.includes(topic)) {
       return res
         .status(404)
-        .send({ success: false, message: "No Topic provided" });
+        .send({ success: false, message: "Invalid or No Topic provided" });
     }
 
     const questions = await Questions.find({ topic }).limit(10);
@@ -103,10 +128,13 @@ export const calculateScore = async (req, res) => {
       !Array.isArray(submittedAnswers) ||
       submittedAnswers.length === 0
     ) {
-      return res.status(400).json({
-        success: false,
-        message: "submittedAnswers is required and should be a non-empty array",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message:
+            "submittedAnswers is required and should be a non-empty array",
+        });
     }
 
     if (!userId) {
@@ -120,10 +148,12 @@ export const calculateScore = async (req, res) => {
       const question = await Questions.findById(questionId);
 
       if (!question) {
-        return res.status(404).json({
-          success: false,
-          message: `Question not found for id: ${questionId}`,
-        });
+        return res
+          .status(404)
+          .json({
+            success: false,
+            message: `Question not found for id: ${questionId}`,
+          });
       }
 
       // Compare submitted answer with the correct answer
@@ -143,10 +173,12 @@ export const calculateScore = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in calculateScore API:", error);
-    return res.status(500).send({
-      success: false,
-      message: "Error in calculateScore API",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .send({
+        success: false,
+        message: "Error in calculateScore API",
+        error: error.message,
+      });
   }
 };
