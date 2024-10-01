@@ -49,6 +49,31 @@ export const registerUser = async (req, res) => {
   }
 };
 
+
+// Email validation API
+export const validateEmail = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (user) {
+      return res
+        .status(409)
+        .json({ success: false, message: "Email already registered" });
+    }
+
+    res.status(200).json({ success:true,message: "Email available" });
+  } catch (error) {
+   console.error("Error in loginUser API:", error);
+   return res.status(500).send({
+     success: false,
+     message: "Error in ValidateEMail API",
+     error: error.message,
+   });
+  }
+};
+
 // User login
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
