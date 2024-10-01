@@ -1,6 +1,7 @@
 import User from "../Model/UserModel.js";
 import { comparePassword, hashPassword } from "../Helpers/AuthHelper.js";
 import jwt from "jsonwebtoken";
+import Question from "../Model/QuestionModel.js"; // Import the Question model
 
 // Register a new user
 export const registerUser = async (req, res) => {
@@ -11,44 +12,44 @@ export const registerUser = async (req, res) => {
     if (!name || typeof name !== "string") {
       return res
         .status(400)
-        .send({ success: false, message: "Enter a valid Name" });
+        .json({ success: false, message: "Enter a valid Name" });
     }
     if (!email || typeof email !== "string") {
       return res
         .status(400)
-        .send({ success: false, message: "Enter a valid Email" });
+        .json({ success: false, message: "Enter a valid Email" });
     }
     if (!password || typeof password !== "string") {
       return res
         .status(400)
-        .send({ success: false, message: "Enter a valid Password" });
+        .json({ success: false, message: "Enter a valid Password" });
     }
 
-    let user = await User.findOne({ email });
-    if (user) {
+    const userExists = await User.findOne({ email });
+    if (userExists) {
       return res
         .status(400)
         .json({ success: false, message: "User already exists" });
     }
 
     const hashedPassword = await hashPassword(password);
-    user = new User({ name, email, password: hashedPassword });
-    await user.save();
+    const newUser = new User({ name, email, password: hashedPassword });
+    await newUser.save();
 
-    res.status(201).json({
-      success: true,
-      message: "User registered successfully",
-    });
+    res
+      .status(201)
+      .json({ success: true, message: "User registered successfully" });
   } catch (error) {
     console.error("Error in registerUser API:", error);
-    return res.status(500).send({
-      success: false,
-      message: "Error in registerUser API",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error in registerUser API",
+        error: error.message,
+      });
   }
 };
-
 
 // Email validation API
 export const validateEmail = async (req, res) => {
@@ -63,14 +64,16 @@ export const validateEmail = async (req, res) => {
         .json({ success: false, message: "Email already registered" });
     }
 
-    res.status(200).json({ success:true,message: "Email available" });
+    res.status(200).json({ success: true, message: "Email available" });
   } catch (error) {
-   console.error("Error in loginUser API:", error);
-   return res.status(500).send({
-     success: false,
-     message: "Error in ValidateEMail API",
-     error: error.message,
-   });
+    console.error("Error in validateEmail API:", error);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error in ValidateEmail API",
+        error: error.message,
+      });
   }
 };
 
@@ -82,50 +85,52 @@ export const loginUser = async (req, res) => {
     if (!email || typeof email !== "string") {
       return res
         .status(400)
-        .send({ success: false, message: "Enter a valid Email" });
+        .json({ success: false, message: "Enter a valid Email" });
     }
     if (!password || typeof password !== "string") {
       return res
         .status(400)
-        .send({ success: false, message: "Enter a valid Password" });
+        .json({ success: false, message: "Enter a valid Password" });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
       return res
         .status(404)
-        .send({ success: false, message: "User not found" });
+        .json({ success: false, message: "User not found" });
     }
 
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
       return res
         .status(400)
-        .send({ success: false, message: "Incorrect password" });
+        .json({ success: false, message: "Incorrect password" });
     }
 
     const token = jwt.sign(
       { id: user._id, isAdmin: user.isAdmin },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "4h",
-      }
+      { expiresIn: "4h" }
     );
     user.password = undefined; // Exclude password from response
 
-    return res.status(200).send({
-      success: true,
-      message: "User logged in successfully",
-      token,
-      user,
-    });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "User logged in successfully",
+        token,
+        user,
+      });
   } catch (error) {
     console.error("Error in loginUser API:", error);
-    return res.status(500).send({
-      success: false,
-      message: "Error in loginUser API",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error in loginUser API",
+        error: error.message,
+      });
   }
 };
 
@@ -133,35 +138,63 @@ export const loginUser = async (req, res) => {
 export const selectTopics = async (req, res) => {
   const { topics } = req.body;
   const userId = req.userId;
+
   try {
     // Validate inputs
     if (!userId || typeof userId !== "string") {
       return res
         .status(400)
-        .send({ success: false, message: "Invalid userId" });
+        .json({ success: false, message: "Invalid userId provided" });
     }
     if (!topics || !Array.isArray(topics)) {
       return res
         .status(400)
-        .send({ success: false, message: "Invalid topics array" });
+        .json({ success: false, message: "Invalid topics array provided" });
     }
 
-    const chkUser = await User.findById(userId);
-    if (!chkUser) {
+    // Check if selected topics are valid
+    const validTopics = [
+      "Physics",
+      "Chemistry",
+      "Biology",
+      "I.T",
+      "Maths",
+      "English",
+      "Marathi",
+    ];
+    const invalidTopics = topics.filter(
+      (topic) => !validTopics.includes(topic)
+    );
+
+    if (invalidTopics.length > 0) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: `Invalid topics selected: ${invalidTopics.join(", ")}`,
+        });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
       return res
         .status(404)
-        .send({ success: false, message: "User not found" });
+        .json({ success: false, message: "User not found" });
     }
 
     await User.findByIdAndUpdate(userId, { selectedTopics: topics });
-    res.status(200).send({ success: true, message: "Topics selected" });
+    res
+      .status(200)
+      .json({ success: true, message: "Topics selected successfully" });
   } catch (error) {
     console.error("Error in selectTopics API:", error);
-    return res.status(500).send({
-      success: false,
-      message: "Error in selectTopics API",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error in selectTopics API",
+        error: error.message,
+      });
   }
 };
 
@@ -171,32 +204,49 @@ export const getScoreListByTopic = async (req, res) => {
 
   try {
     // Validate topic input
-    if (!topic || typeof topic !== "string") {
-      return res.status(400).send({ success: false, message: "Invalid topic" });
+    const validTopics = [
+      "Physics",
+      "Chemistry",
+      "Biology",
+      "I.T",
+      "Maths",
+      "English",
+      "Marathi",
+    ];
+    if (!topic || typeof topic !== "string" || !validTopics.includes(topic)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid topic provided" });
     }
 
     // Fetch users who have selected this topic and have scores
-    const users = await User.find({ selectedTopics: topic }, "name scores");
+    const users = await User.find({ selectedTopics: topic }, "name score");
 
     // Check if users exist
     if (!users || users.length === 0) {
-      return res.status(404).send({
-        success: false,
-        message: `No scores found for topic (${topic})`,
-      });
+      return res
+        .status(404)
+        .json({
+          success: false,
+          message: `No scores found for topic: ${topic}`,
+        });
     }
 
-    res.status(200).send({
-      success: true,
-      scores: users,
-      message: `Score list for the topic (${topic}) fetched successfully`,
-    });
+    res
+      .status(200)
+      .json({
+        success: true,
+        scores: users,
+        message: `Score list for the topic "${topic}" fetched successfully`,
+      });
   } catch (error) {
     console.error("Error in getScoreListByTopic API:", error);
-    return res.status(500).send({
-      success: false,
-      message: "Error in getScoreListByTopic API",
-      error: error.message,
-    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error in getScoreListByTopic API",
+        error: error.message,
+      });
   }
 };

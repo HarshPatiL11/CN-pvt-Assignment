@@ -13,6 +13,15 @@ const questionSchema = new mongoose.Schema(
     },
     topic: {
       type: String,
+      enum: [
+        "Physics",
+        "Chemistry",
+        "Biology",
+        "I.T",
+        "Maths",
+        "English",
+        "Marathi",
+      ],
       required: true,
     },
   },
