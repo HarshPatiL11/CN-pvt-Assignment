@@ -302,7 +302,7 @@ const Register = () => {
                   ? "input-valid"
                   : error.confirmPasswordError
                   ? "input-invalid"
-                  : ""
+                  : ""  
               }
             />
             {error.confirmPasswordError && (
