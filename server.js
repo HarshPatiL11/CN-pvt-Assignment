@@ -35,5 +35,5 @@ app.use('/api',router)
 // Start the server
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}   `.green.bold.italic.bgBlack);
+  console.log(`Server running on port ${PORT}`.green.bold.italic.bgBlack);
 });
