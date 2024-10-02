@@ -272,3 +272,44 @@ export const getScoreListByTopic = async (req, res) => {
       });
   }
 };
+
+
+// Get selected topics and scores of a user
+export const getUserSelectedTopicsWithScores = async (req, res) => {
+  const userId = req.userId; 
+
+  try {
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User ID is required" });
+    }
+
+    // Find the user by ID
+    const user = await User.findById(userId).select("selectedTopics scores");
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    const selectedTopicsWithScores = user.selectedTopics.map(topic => ({
+      topic,
+      score: user.scores.get(topic) || 0 // Default to 0 if score not found
+    }));
+
+    return res.status(200).json({
+      success: true,
+      selectedTopics: selectedTopicsWithScores,
+      message: "Selected topics and scores fetched successfully",
+    });
+  } catch (error) {
+    console.error("Error in getUserSelectedTopics API:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error in getUserSelectedTopics API",
+      error: error.message,
+    });
+  }
+};

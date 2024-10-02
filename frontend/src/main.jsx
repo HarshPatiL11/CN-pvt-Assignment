@@ -13,7 +13,9 @@ import ViewAllQuestions from "./Components/Pages/Admin/ViewAllQuestions.jsx";
 import TopicsPage from "./Components/Pages/Admin/TopicsPage.jsx";
 import AdminHome from "./Components/Pages/Admin/AdminHome.jsx";
 import SelectTopics from "./Components/Pages/User/SelectTopic.jsx";
-import QuizPage from "./Components/Pages/User/QuizPage.jsx";
+import UserTopics from "./Components/Pages/User/QuizPage.jsx";
+import ViewQuestionsBYTopic from "./Components/Pages/User/ViewQuestionbyTopic.jsx";
+import ScorePage from "./Components/Pages/User/ScorePage.jsx";
 
 // Define routes using createBrowserRouter
 const router = createBrowserRouter([
@@ -21,8 +23,9 @@ const router = createBrowserRouter([
   { path: "/user/login", element: <LoginPage /> },
   { path: "/user/register", element: <Register /> },
   { path: "/user/select-topics", element: <SelectTopics /> },
-  { path: "/user/qustion", element: <QuizPage /> },
-
+  { path: "/user/topics", element: <UserTopics /> },
+  { path: "/user/questions/:topic", element: <ViewQuestionsBYTopic /> },
+  { path: "/user/score", element: <ScorePage /> },
   // Admin Routes
   { path: "/admin", element: <AdminHome /> },
   { path: "/admin/questions/:topic", element: <ViewQuestionsBYTopicAdmin /> },

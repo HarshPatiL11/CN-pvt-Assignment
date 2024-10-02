@@ -1,114 +1,77 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Table } from "antd";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
 import axios from "axios";
+import "../../Css/AntdTable.css";
 
-const QuizPage = () => {
+const UserTopics = () => {
+  const navigate = useNavigate();
   const [selectedTopics, setSelectedTopics] = useState([]);
-  const [questions, setQuestions] = useState([]);
-  const [submittedAnswers, setSubmittedAnswers] = useState({});
-  const [score, setScore] = useState(null);
-  const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    // Fetch the user's selected topics
-    const fetchSelectedTopics = async () => {
+    const fetchSelectedTopicsWithScores = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8000/api/users/topics/selected",
+          "http://localhost:8000/api/users/topics/selectedWithScores",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
         if (response.data.success) {
-          console.log("Selected Topics:", response.data.selectedTopics); // Debugging
           setSelectedTopics(response.data.selectedTopics);
-          // Now fetch questions for these topics
-          fetchQuestions(response.data.selectedTopics);
+        } else {
+          console.error(response.data.message);
         }
       } catch (error) {
         console.error("Error fetching selected topics:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchSelectedTopics();
+    fetchSelectedTopicsWithScores();
   }, [token]);
 
-  const fetchQuestions = async (topics) => {
-    if (topics.length === 0) {
-      console.warn("No topics selected.");
-      return; // Prevent API call if no topics
-    }
-
-    try {
-      const response = await axios.get(
-        `http://localhost:8000/api/questions/${topics.join(",")}`
-      );
-      if (response.data.success) {
-        setQuestions(response.data.questions);
-      }
-    } catch (error) {
-      console.error("Error fetching questions:", error);
-    }
+  const handleViewQuestions = (topic) => {
+    navigate(`/user/questions/${topic}`);
   };
 
-  const handleAnswerChange = (questionId, answer) => {
-    setSubmittedAnswers({
-      ...submittedAnswers,
-      [questionId]: answer,
-    });
-  };
+  const columns = [
+    {
+      title: "Topic",
+      dataIndex: "topic",
+      key: "topic",
+    },
+    {
+      title: "Score",
+      dataIndex: "score",
+      key: "score",
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <MdOutlineRemoveRedEye
+          size={24}
+          className="icon"
+          onClick={() => handleViewQuestions(record.topic)}
+        />
+      ),
+    },
+  ];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post(
-        "http://localhost:8000/api/users",
-        { submittedAnswers },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (response.data.success) {
-        setScore(response.data.score);
-      }
-    } catch (error) {
-      console.error("Error submitting answers:", error);
-    }
-  };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const dataSource = selectedTopics.map((item, index) => ({
+    key: index,
+    topic: item.topic,
+    score: item.score,
+  }));
 
   return (
-    <div>
-      <h1>Quiz Page</h1>
-      {score !== null && <h2>Your Score: {score}</h2>}
-      <form onSubmit={handleSubmit}>
-        {questions.map((question) => (
-          <div key={question._id}>
-            <h3>{question.questionText}</h3>
-            {question.options.map((option, index) => (
-              <div key={index}>
-                <input
-                  type="radio"
-                  name={question._id}
-                  value={option}
-                  onChange={() => handleAnswerChange(question._id, option)}
-                  checked={submittedAnswers[question._id] === option}
-                />
-                <label>{option}</label>
-              </div>
-            ))}
-          </div>
-        ))}
-        <button type="submit" className="login-btn
-        ">Submit Answers</button>
-      </form>
+    <div className="table-container">
+      <h1>User Quiz Topics and Scores</h1>
+      <Table columns={columns} dataSource={dataSource} pagination={false} />
     </div>
   );
 };
 
-export default QuizPage;
+export default UserTopics;
