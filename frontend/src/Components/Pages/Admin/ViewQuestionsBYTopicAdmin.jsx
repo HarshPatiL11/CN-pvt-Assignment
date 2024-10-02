@@ -1,20 +1,21 @@
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Table } from "antd";
 import "../../Css/AntdTable.css";
 
-const ViewAllQuestions = () => {
+const ViewQuestionsBYTopicAdmin = () => {
+  const { topic } = useParams();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8000/api/questions/all",
+          `http://localhost:8000/api/questions/${topic}/Admin`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -23,23 +24,25 @@ const ViewAllQuestions = () => {
         if (response.data && Array.isArray(response.data.questions)) {
           setQuestions(response.data.questions);
         } else {
-          throw new Error("Questions data is not available");
+          setQuestions([]);
         }
       } catch (err) {
-        console.error(err);
-        setError(
-          err.response ? err.response.data.message : "Error fetching questions"
-        );
+        setError("Failed to fetch questions for the selected topic.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchQuestions();
-  }, [token]);
+  }, [topic]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   const columns = [
     {
@@ -64,11 +67,6 @@ const ViewAllQuestions = () => {
       dataIndex: "correctAnswer",
       key: "correctAnswer",
     },
-    {
-      title: "Topic",
-      dataIndex: "topic",
-      key: "topic",
-    },
   ];
 
   const dataSource = questions.map((question) => ({
@@ -76,19 +74,18 @@ const ViewAllQuestions = () => {
     questionText: question.questionText,
     options: question.options,
     correctAnswer: question.correctAnswer,
-    topic: question.topic,
   }));
 
   return (
     <div className="table-container">
-      <h1>All Questions</h1>
-      {questions.length === 0 ? (
-        <p>No questions available</p>
-      ) : (
+      <h1>Questions for {topic}</h1>
+      {questions.length > 0 ? (
         <Table columns={columns} dataSource={dataSource} pagination={false} />
+      ) : (
+        <p>No questions available for this topic.</p>
       )}
     </div>
   );
 };
 
-export default ViewAllQuestions;
+export default ViewQuestionsBYTopicAdmin;

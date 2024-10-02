@@ -9,17 +9,24 @@ const LoginPage = () => {
     email: "",
     password: "",
   });
+
   const [error, setError] = useState({
     emailError: null,
     passwordError: null,
     generalError: null,
   });
+
   const [valid, setValid] = useState({
     isEmailValid: false,
     isPasswordValid: false,
   });
 
   const navigate = useNavigate();
+
+  const validateEmailFormat = (email) => {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailPattern.test(email);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,6 +39,28 @@ const LoginPage = () => {
       ...prev,
       [`${name}Error`]: null,
     }));
+
+    if (name === "email") {
+      if (!validateEmailFormat(value)) {
+        setError((prev) => ({
+          ...prev,
+          emailError: "Please enter a valid email.",
+        }));
+        setValid((prev) => ({ ...prev, isEmailValid: false }));
+      } else {
+        setValid((prev) => ({ ...prev, isEmailValid: true }));
+      }
+    } else if (name === "password") {
+      if (value.length < 8) {
+        setError((prev) => ({
+          ...prev,
+          passwordError: "Password must be at least 8 characters long.",
+        }));
+        setValid((prev) => ({ ...prev, isPasswordValid: false }));
+      } else {
+        setValid((prev) => ({ ...prev, isPasswordValid: true }));
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -41,44 +70,36 @@ const LoginPage = () => {
     setError({ emailError: null, passwordError: null, generalError: null });
 
     // Frontend validation
-    if (!email && !password) {
-      setError({
-        emailError: "Email is required",
-        passwordError: "Password is required",
-      });
-      // toast.error("Email & Password not Entered");
-      setValid({ isEmailValid: false, isPasswordValid: false });
+    if (!email) {
+      setError((prev) => ({ ...prev, emailError: "Email is required." }));
+      setValid((prev) => ({ ...prev, isEmailValid: false }));
       return;
-    } else if (!email) {
-      setError({
-        emailError: "Email is required",
-        passwordError: "No Email to Validate Password",
-      });
-      toast.error("Email is Not Entered");
-
-      setValid({ isEmailValid: false });
+    } else if (!validateEmailFormat(email)) {
+      setError((prev) => ({
+        ...prev,
+        emailError: "Please enter a valid email.",
+      }));
+      setValid((prev) => ({ ...prev, isEmailValid: false }));
       return;
-    } else if (email && !password) {
-      setError({ passwordError: "Password is required" });
-      toast.error("Password not Entered");
+    }
 
-      setValid({ isEmailValid: true, isPasswordValid: false });
+    if (!password) {
+      setError((prev) => ({ ...prev, passwordError: "Password is required." }));
+      setValid((prev) => ({ ...prev, isPasswordValid: false }));
       return;
-    } else if (!password) {
-      setError({ passwordError: "Password is required" });
-      toast.error("Password not Entered");
-
-      setValid({ isPasswordValid: false });
+    } else if (password.length < 8) {
+      setError((prev) => ({
+        ...prev,
+        passwordError: "Password must be at least 8 characters long.",
+      }));
+      setValid((prev) => ({ ...prev, isPasswordValid: false }));
       return;
     }
 
     try {
       const response = await axios.post(
         "http://localhost:8000/api/users/login",
-        {
-          email,
-          password: password,
-        }
+        { email, password }
       );
 
       const { token, user } = response.data;
@@ -89,11 +110,10 @@ const LoginPage = () => {
         isPasswordValid: true,
       });
 
-      // Success toast
       toast.success("Login successful!");
 
       if (user.isAdmin) {
-        navigate("/");
+        navigate("/admin/manage-events");
       } else {
         navigate("/");
       }
@@ -102,10 +122,10 @@ const LoginPage = () => {
         const errorMsg = error.response.data.message;
 
         if (errorMsg === "User not found") {
-          toast.error("Login Falied : Incorrect Email");
+          toast.error("Login failed: Incorrect email");
           setError({
-            emailError: "Email is Incorect",
-            passwordError: " ",
+            emailError: "Email is incorrect.",
+            passwordError: "",
             generalError: "Invalid email. Please check your email address.",
           });
           setValid({
@@ -114,26 +134,26 @@ const LoginPage = () => {
           });
         } else if (errorMsg === "Incorrect password. Please try again.") {
           setError({
-            generalError: " ",
-            passwordError: "Password is Incorect",
+            generalError: "",
+            passwordError: "Password is incorrect.",
           });
           setValid({
             isEmailValid: true,
             isPasswordValid: false,
           });
-          toast.error("Login failed : Incorect Password");
+          toast.error("Login failed: Incorrect password");
         } else {
           setError({
             generalError:
               errorMsg || "Login failed. Please check your credentials.",
-            passwordError: " ",
-            emailError: " ",
+            passwordError: "",
+            emailError: "",
           });
           setValid({
             isEmailValid: false,
             isPasswordValid: false,
           });
-          toast.error("Login failed. Please check your credentials. ");
+          toast.error("Login failed. Please check your credentials.");
         }
       } else {
         setError({
@@ -144,67 +164,60 @@ const LoginPage = () => {
   };
 
   return (
-    <>
-      <div className="LoginContainer">
-        <div className="loginHeader"></div>
-        <div className="LoginBody">
-          <h3>Login</h3>
+    <div className="LoginContainer">
+      <div className="loginHeader"></div>
+      <div className="LoginBody">
+        <h3>Login</h3>
 
-          {error.generalError && (
-            <div className="error-message">{error.generalError}</div>
-          )}
+        {error.generalError && (
+          <div className="error-message">{error.generalError}</div>
+        )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <input
-                type="email"
-                placeholder="Email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={
-                  valid.isEmailValid
-                    ? "input-valid"
-                    : error.emailError
-                    ? "input-invalid"
-                    : ""
-                }
-              />
-              {error.emailError && (
-                <div className="error-message">{error.emailError}</div>
-              )}
-            </div>
-            <div className="input-group">
-              <input
-                type="password"
-                placeholder="Password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className={
-                  valid.isPasswordValid
-                    ? "input-valid"
-                    : error.passwordError
-                    ? "input-invalid"
-                    : ""
-                }
-              />
-              {error.passwordError && (
-                <div className="error-message">{error.passwordError}</div>
-              )}
-            </div>
-            <button type="submit" className="login-btn">
-              Login
-            </button>
-          </form>
-          {/* <div className="signup-link">
-            <p>
-              Don't have an account? <Link to="/register">Sign up</Link>
-            </p>
-          </div> */}
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <input
+              type="email"
+              placeholder="Email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={
+                valid.isEmailValid
+                  ? "input-valid"
+                  : error.emailError
+                  ? "input-invalid"
+                  : ""
+              }
+            />
+            {error.emailError && (
+              <div className="error-message">{error.emailError}</div>
+            )}
+          </div>
+          <div className="input-group">
+            <input
+              type="password"
+              placeholder="Password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={
+                valid.isPasswordValid
+                  ? "input-valid"
+                  : error.passwordError
+                  ? "input-invalid"
+                  : ""
+              }
+            />
+            {error.passwordError && (
+              <div className="error-message">{error.passwordError}</div>
+            )}
+          </div>
+          <button type="submit" className="login-btn">
+            Login
+          </button>
+        </form>
       </div>
-    </>
+    </div>
   );
 };
 

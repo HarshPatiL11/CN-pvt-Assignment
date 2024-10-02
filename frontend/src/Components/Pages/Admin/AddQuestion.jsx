@@ -1,271 +1,271 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-// import "../../Css/AddQuestion.css"; // Import your CSS file
+import { FaTrashAlt } from "react-icons/fa"; // Import the trash icon
+import "../../Css/AddQuestion.css";
 
 const AddQuestion = () => {
   const [formData, setFormData] = useState({
-    questionText: "",
-    options: [""], // Start with one empty input for options
+    question: "",
+    options: ["", ""], // Start with two empty options
     correctAnswer: "",
-    topic: "",
+    topic: "", // Persist topic
   });
+
   const [error, setError] = useState({
     questionError: null,
     optionsError: null,
     correctAnswerError: null,
-    topicError: null,
     generalError: null,
   });
+
   const [valid, setValid] = useState({
     isQuestionValid: false,
     areOptionsValid: false,
     isCorrectAnswerValid: false,
-    isTopicValid: false,
   });
+
+  const validateFields = () => {
+    let isValid = true;
+
+    // Validate Question
+    if (!formData.question) {
+      setError((prev) => ({
+        ...prev,
+        questionError: "Question is required.",
+      }));
+      setValid((prev) => ({ ...prev, isQuestionValid: false }));
+      isValid = false;
+    } else {
+      setError((prev) => ({ ...prev, questionError: null }));
+      setValid((prev) => ({ ...prev, isQuestionValid: true }));
+    }
+
+    // Validate Options
+    if (
+      formData.options.length < 2 ||
+      formData.options.length > 6 ||
+      formData.options.some((opt) => opt === "")
+    ) {
+      setError((prev) => ({
+        ...prev,
+        optionsError: "Please provide between 2 and 6 valid options.",
+      }));
+      setValid((prev) => ({ ...prev, areOptionsValid: false }));
+      isValid = false;
+    } else {
+      setError((prev) => ({ ...prev, optionsError: null }));
+      setValid((prev) => ({ ...prev, areOptionsValid: true }));
+    }
+
+    // Validate Correct Answer
+    if (!formData.correctAnswer) {
+      setError((prev) => ({
+        ...prev,
+        correctAnswerError: "Correct answer is required.",
+      }));
+      setValid((prev) => ({ ...prev, isCorrectAnswerValid: false }));
+      isValid = false;
+    } else {
+      setError((prev) => ({ ...prev, correctAnswerError: null }));
+      setValid((prev) => ({ ...prev, isCorrectAnswerValid: true }));
+    }
+
+    // Validate Topic
+    if (!formData.topic) {
+      setError((prev) => ({
+        ...prev,
+        generalError: "Topic is required.",
+      }));
+      isValid = false;
+    } else {
+      setError((prev) => ({ ...prev, generalError: null }));
+    }
+
+    return isValid;
+  };
 
   const handleChange = (e, index) => {
     const { name, value } = e.target;
 
-    // Update the options array if changing an option
     if (name === "options") {
-      const newOptions = [...formData.options];
-      newOptions[index] = value;
-      setFormData((prev) => ({
-        ...prev,
-        options: newOptions,
-      }));
-
-      // Clear specific error on input change
-      setError((prev) => ({
-        ...prev,
-        optionsError: null,
-      }));
+      const updatedOptions = [...formData.options];
+      updatedOptions[index] = value;
+      setFormData({
+        ...formData,
+        options: updatedOptions,
+      });
     } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+
+    setError((prev) => ({
+      ...prev,
+      [`${name}Error`]: null,
+    }));
+  };
+
+  const addOption = () => {
+    if (formData.options.length < 6) {
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
-      }));
-
-      // Clear specific error on input change
-      setError((prev) => ({
-        ...prev,
-        [`${name}Error`]: null,
+        options: [...prev.options, ""],
       }));
     }
   };
 
-  const addOptionField = () => {
-    // Only add a new option if there are fewer than 6 options
-    if (formData.options.length < 6) {
-      setFormData((prev) => ({
-        ...prev,
-        options: [...prev.options, ""], // Add a new empty option field
-      }));
-    } else {
-      toast.error("You can only add up to 6 options.");
-    }
+  const removeOption = (index) => {
+    const updatedOptions = [...formData.options];
+    updatedOptions.splice(index, 1);
+    setFormData((prev) => ({
+      ...prev,
+      options: updatedOptions,
+    }));
+  };
+
+  const clearTopic = () => {
+    setFormData((prev) => ({ ...prev, topic: "" }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { questionText, options, correctAnswer, topic } = formData;
-
-    setError({
-      questionError: null,
-      optionsError: null,
-      correctAnswerError: null,
-      topicError: null,
-      generalError: null,
-    });
-
-    // Frontend validation
-    if (!questionText) {
-      setError((prev) => ({
-        ...prev,
-        questionError: "Question text is required",
-      }));
-      toast.error("Question text is required");
-      setValid((prev) => ({ ...prev, isQuestionValid: false }));
-      return;
-    }
-
-    // Validate options
-    const filteredOptions = options.filter((option) => option.trim() !== ""); // Remove empty options
-    if (filteredOptions.length < 2) {
-      setError((prev) => ({
-        ...prev,
-        optionsError: "At least two options are required",
-      }));
-      toast.error("At least two options are required");
-      setValid((prev) => ({ ...prev, areOptionsValid: false }));
-      return;
-    }
-
-    if (filteredOptions.length > 6) {
-      setError((prev) => ({
-        ...prev,
-        optionsError: "You can have a maximum of six options",
-      }));
-      toast.error("You can have a maximum of six options");
-      setValid((prev) => ({ ...prev, areOptionsValid: false }));
-      return;
-    }
-
-    if (!correctAnswer) {
-      setError((prev) => ({
-        ...prev,
-        correctAnswerError: "Correct answer is required",
-      }));
-      toast.error("Correct answer is required");
-      setValid((prev) => ({ ...prev, isCorrectAnswerValid: false }));
-      return;
-    }
-
-    if (!topic) {
-      setError((prev) => ({ ...prev, topicError: "Topic is required" }));
-      toast.error("Topic is required");
-      setValid((prev) => ({ ...prev, isTopicValid: false }));
-      return;
-    }
+    if (!validateFields()) return;
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/questions/add",
-        {
-          questionText,
-          options: filteredOptions, // Use filtered options
-          correctAnswer,
-          topic,
-        }
-      );
+      await axios.post("http://localhost:8000/api/questions/add", formData, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+      toast.success("Question added successfully");
 
-      toast.success("Question added successfully!");
-      // Reset form after successful submission
-      setFormData({
-        questionText: "",
-        options: [""], // Reset to one empty input
+      // Clear the form but keep the topic
+      setFormData((prev) => ({
+        ...prev,
+        question: "",
+        options: ["", ""],
         correctAnswer: "",
-        topic: "",
-      });
-    } catch (error) {
-      const errorMsg = error.response
-        ? error.response.data.message
-        : "Error adding question. Please try again.";
-      setError((prev) => ({ ...prev, generalError: errorMsg }));
-      toast.error(errorMsg);
+      }));
+    } catch (err) {
+      setError((prev) => ({
+        ...prev,
+        generalError: "Failed to add question. Please try again.",
+      }));
     }
   };
 
   return (
     <div className="AddQuestionContainer">
-      <h3>Add Question</h3>
-      {error.generalError && (
-        <div className="error-message">{error.generalError}</div>
-      )}
-      <form onSubmit={handleSubmit}>
-        <div className="input-group">
-          <input
-            type="text"
-            placeholder="Question Text"
-            name="questionText"
-            value={formData.questionText}
-            onChange={handleChange}
-            className={
-              valid.isQuestionValid
-                ? "input-valid"
-                : error.questionError
-                ? "input-invalid"
-                : ""
-            }
-          />
-          {error.questionError && (
-            <div className="error-message">{error.questionError}</div>
-          )}
-        </div>
+      <div className="AddQuestionBody">
+        <h3>Add New Question</h3>
 
-        <div className="input-group">
-          <label>Options:</label>
-          {formData.options.map((option, index) => (
+        {error.generalError && (
+          <div className="error-message">{error.generalError}</div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
             <input
-              key={index}
               type="text"
-              placeholder={`Option ${index + 1}`}
-              name="options"
-              value={option}
-              onChange={(e) => handleChange(e, index)}
+              placeholder="Question"
+              name="question"
+              value={formData.question}
+              onChange={handleChange}
               className={
-                valid.areOptionsValid
+                valid.isQuestionValid
                   ? "input-valid"
-                  : error.optionsError
+                  : error.questionError
                   ? "input-invalid"
                   : ""
               }
             />
-          ))}
-          {error.optionsError && (
-            <div className="error-message">{error.optionsError}</div>
-          )}
-          <button
-            type="button"
-            onClick={addOptionField}
-            className="add-option-btn"
-          >
-            Add Option
+            {error.questionError && (
+              <div className="error-message">{error.questionError}</div>
+            )}
+          </div>
+
+          <div className="input-group">
+            <label>Options:</label>
+            {formData.options.map((option, index) => (
+              <div key={index} className="option-input-group">
+                <input
+                  type="text"
+                  placeholder={`Option ${index + 1}`}
+                  name="options"
+                  value={option}
+                  onChange={(e) => handleChange(e, index)}
+                  className={
+                    valid.areOptionsValid
+                      ? "input-valid"
+                      : error.optionsError
+                      ? "input-invalid"
+                      : ""
+                  }
+                />
+                {formData.options.length > 2 && (
+                  <FaTrashAlt
+                    className="trash-icon"
+                    onClick={() => removeOption(index)}
+                  />
+                )}
+              </div>
+            ))}
+            {error.optionsError && (
+              <div className="error-message">{error.optionsError}</div>
+            )}
+            <button type="button" onClick={addOption}>
+              Add Option
+            </button>
+          </div>
+
+          <div className="input-group">
+            <input
+              type="text"
+              placeholder="Correct Answer"
+              name="correctAnswer"
+              value={formData.correctAnswer}
+              onChange={handleChange}
+              className={
+                valid.isCorrectAnswerValid
+                  ? "input-valid"
+                  : error.correctAnswerError
+                  ? "input-invalid"
+                  : ""
+              }
+            />
+            {error.correctAnswerError && (
+              <div className="error-message">{error.correctAnswerError}</div>
+            )}
+          </div>
+
+          <div className="input-group">
+            <select
+              name="topic"
+              value={formData.topic}
+              onChange={handleChange}
+              disabled={formData.topic !== ""}
+              className={formData.topic ? "input-valid" : ""}
+            >
+              <option value="">Select a Topic</option>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Biology">Biology</option>
+              <option value="I.T">I.T</option>
+              <option value="Maths">Maths</option>
+              <option value="English">English</option>
+              <option value="Marathi">Marathi</option>
+            </select>
+            <button type="button" onClick={clearTopic}>
+              Clear Topic
+            </button>
+          </div>
+
+          <button type="submit" className="submit-btn">
+            Add Question
           </button>
-        </div>
-
-        <div className="input-group">
-          <input
-            type="text"
-            placeholder="Correct Answer"
-            name="correctAnswer"
-            value={formData.correctAnswer}
-            onChange={handleChange}
-            className={
-              valid.isCorrectAnswerValid
-                ? "input-valid"
-                : error.correctAnswerError
-                ? "input-invalid"
-                : ""
-            }
-          />
-          {error.correctAnswerError && (
-            <div className="error-message">{error.correctAnswerError}</div>
-          )}
-        </div>
-
-        <div className="input-group">
-          <select
-            name="topic"
-            value={formData.topic}
-            onChange={handleChange}
-            className={
-              valid.isTopicValid
-                ? "input-valid"
-                : error.topicError
-                ? "input-invalid"
-                : ""
-            }
-          >
-            <option value="">Select Topic</option>
-            <option value="Physics">Physics</option>
-            <option value="Chemistry">Chemistry</option>
-            <option value="Biology">Biology</option>
-            <option value="I.T">I.T</option>
-            <option value="Maths">Maths</option>
-            <option value="English">English</option>
-            <option value="Marathi">Marathi</option>
-          </select>
-          {error.topicError && (
-            <div className="error-message">{error.topicError}</div>
-          )}
-        </div>
-
-        <button type="submit" className="add-question-btn">
-          Add Question
-        </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

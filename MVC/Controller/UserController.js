@@ -1,7 +1,7 @@
 import User from "../Model/UserModel.js";
 import { comparePassword, hashPassword } from "../Helpers/AuthHelper.js";
 import jwt from "jsonwebtoken";
-import Question from "../Model/QuestionModel.js"; // Import the Question model
+import Question from "../Model/Questions.js"; // Import the Question model
 
 // Register a new user
 export const registerUser = async (req, res) => {
@@ -41,39 +41,32 @@ export const registerUser = async (req, res) => {
       .json({ success: true, message: "User registered successfully" });
   } catch (error) {
     console.error("Error in registerUser API:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error in registerUser API",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Error in registerUser API",
+      error: error.message,
+    });
   }
 };
 
 // Email validation API
 export const validateEmail = async (req, res) => {
   const { email } = req.body;
-
   try {
     const user = await User.findOne({ email });
-
     if (user) {
       return res
         .status(409)
         .json({ success: false, message: "Email already registered" });
     }
-
     res.status(200).json({ success: true, message: "Email available" });
   } catch (error) {
     console.error("Error in validateEmail API:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error in ValidateEmail API",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Error in ValidateEmail API",
+      error: error.message,
+    });
   }
 };
 
@@ -114,23 +107,19 @@ export const loginUser = async (req, res) => {
     );
     user.password = undefined; // Exclude password from response
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "User logged in successfully",
-        token,
-        user,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "User logged in successfully",
+      token,
+      user,
+    });
   } catch (error) {
     console.error("Error in loginUser API:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error in loginUser API",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Error in loginUser API",
+      error: error.message,
+    });
   }
 };
 
@@ -141,10 +130,10 @@ export const selectTopics = async (req, res) => {
 
   try {
     // Validate inputs
-    if (!userId || typeof userId !== "string") {
+    if (!userId) {
       return res
         .status(400)
-        .json({ success: false, message: "Invalid userId provided" });
+        .json({ success: false, message: "No userId provided" });
     }
     if (!topics || !Array.isArray(topics)) {
       return res
@@ -167,12 +156,10 @@ export const selectTopics = async (req, res) => {
     );
 
     if (invalidTopics.length > 0) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `Invalid topics selected: ${invalidTopics.join(", ")}`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `Invalid topics selected: ${invalidTopics.join(", ")}`,
+      });
     }
 
     const user = await User.findById(userId);
@@ -188,15 +175,50 @@ export const selectTopics = async (req, res) => {
       .json({ success: true, message: "Topics selected successfully" });
   } catch (error) {
     console.error("Error in selectTopics API:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error in selectTopics API",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Error in selectTopics API",
+      error: error.message,
+    });
   }
 };
+
+
+// Get selected topics of a user
+export const getUserSelectedTopics = async (req, res) => {
+  const userId = req.userId; 
+
+  try {
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User ID is required" });
+    }
+
+    // Find the user by ID
+    const user = await User.findById(userId).select("selectedTopics");
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      selectedTopics: user.selectedTopics,
+      message: "Selected topics fetched successfully",
+    });
+  } catch (error) {
+    console.error("Error in getUserSelectedTopics API:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error in getUserSelectedTopics API",
+      error: error.message,
+    });
+  }
+};
+
 
 // Get score list by topic
 export const getScoreListByTopic = async (req, res) => {

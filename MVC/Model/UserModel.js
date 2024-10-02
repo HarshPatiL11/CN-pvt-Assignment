@@ -18,11 +18,10 @@ const userSchema = new mongoose.Schema(
     selectedTopics: {
       type: [String],
       default: [],
-    },
-    // Track score per topic
+    }, 
     scores: {
-      type: Map, // This stores scores as key-value pairs (topic -> score)
-      of: Number, // The value will be the score for the topic
+      type: Map, 
+      of: Number, 
       default: {},
     },
     isAdmin: {

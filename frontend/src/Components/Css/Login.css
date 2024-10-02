@@ -1,123 +1,123 @@
-/* Container that covers the full height of the screen */
-.LoginContainer {
-  height: 87vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f5f5f5; /* Light background */
-}
-
-/* Main body of the login box with glass card effect */
-.LoginBody {
-  width: 350px;
-  margin: 100px auto;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Soft shadow */
-  backdrop-filter: blur(10px); /* Glass blur effect */
-  -webkit-backdrop-filter: blur(10px);
-  text-align: center;
-}
-
-/* Login heading */
-.LoginBody h3 {
-  font-family: "Montserrat", Arial, sans-serif;
-  color: #b71c1c; /* Red heading */
-  margin-bottom: 20px;
-}
-
-/* Input group to control spacing */
-.input-group {
-  margin-bottom: 15px;
-}
-
-/* Default input field styling with red and white theme */
-input[type="text"],
-input[type="email"],
-input[type="password"] {
-  width: 100%;
-  padding: 10px;
-  margin: 5px 0;
-  border: 1px solid rgba(255, 255, 255, 0.5); /* Transparent white border */
-  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
-  color: #333;
-  border-radius: 4px;
-  box-sizing: border-box;
-  font-family: "Montserrat", Arial, sans-serif;
-  transition: border 0.1s ease-in-out;
-}
-
-/* Input field focus state - set border to orange */
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus {
-  border: 2px solid #ffa500 !important; /* Orange border on focus */
-  outline: none;
-}
-
-/* Input field with a green border for valid data */
-.input-valid {
-  border: 2px solid #4caf50 !important; /* Green for valid input */
-}
-
-/* Input field with a red border for invalid data */
-.input-invalid {
-  border: 2px solid #b71c1c !important; /* Red for invalid input */
-}
-
-/* Button styling */
-.login-btn {
-  width: 100%;
-  padding: 10px;
-  background-color: #b71c1c; /* Red button */
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: "Montserrat", Arial, sans-serif;
-  transition: background-color 0.3s ease-in-out;
-}
-
-/* Button hover effect */
-.login-btn:hover {
-  background-color: #a00000; /* Darker red on hover */
-}
-
-/* Signup link */
-.signup-link {
-  margin-top: 15px;
-}
-
-.signup-link a {
-  color: #b71c1c; /* Red link */
-  text-decoration: none;
-}
-
-.signup-link a:hover {
-  text-decoration: underline;
-}
-
-/* Error and success message styling */
-.error-message,
-.success-message {
-  font-size: 14px;
-  margin-bottom: 10px;
-}
-
-.error-message {
-  color: #b71c1c !important; /* Red color for error */
-}
-
-.success-message {
-  color: #4caf50 !important; /* Green color for success */
-}
-
-/* Mobile responsiveness */
-@media (max-width: 400px) {
-  .LoginBody {
-    width: 90%;
-    margin: 50px auto;
+  /* Container that covers the full height of the screen */
+  .LoginContainer {
+    height: 87vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5; /* Light background */
   }
-}
+
+  /* Main body of the login box with glass card effect */
+  .LoginBody {
+    width: 350px;
+    margin: 100px auto;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    backdrop-filter: blur(10px); /* Glass blur effect */
+    -webkit-backdrop-filter: blur(10px);
+    text-align: center;
+  }
+
+  /* Login heading */
+  .LoginBody h3 {
+    font-family: "Montserrat", Arial, sans-serif;
+    color: #b71c1c; /* Red heading */
+    margin-bottom: 20px;
+  }
+
+  /* Input group to control spacing */
+  .input-group {
+    margin-bottom: 15px;
+  }
+
+  /* Default input field styling with red and white theme */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Transparent white border */
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+    color: #333;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: "Montserrat", Arial, sans-serif;
+    transition: border 0.1s ease-in-out;
+  }
+
+  /* Input field focus state - set border to orange */
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus {
+    border: 2px solid #ffa500 !important; /* Orange border on focus */
+    outline: none;
+  }
+
+  /* Input field with a green border for valid data */
+  .input-valid {
+    border: 2px solid #4caf50 !important; /* Green for valid input */
+  }
+
+  /* Input field with a red border for invalid data */
+  .input-invalid {
+    border: 2px solid #b71c1c !important; /* Red for invalid input */
+  }
+
+  /* Button styling */
+  .login-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #b71c1c; /* Red button */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: "Montserrat", Arial, sans-serif;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  /* Button hover effect */
+  .login-btn:hover {
+    background-color: #a00000; /* Darker red on hover */
+  }
+
+  /* Signup link */
+  .signup-link {
+    margin-top: 15px;
+  }
+
+  .signup-link a {
+    color: #b71c1c; /* Red link */
+    text-decoration: none;
+  }
+
+  .signup-link a:hover {
+    text-decoration: underline;
+  }
+
+  /* Error and success message styling */
+  .error-message,
+  .success-message {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .error-message {
+    color: #b71c1c !important; /* Red color for error */
+  }
+
+  .success-message {
+    color: #4caf50 !important; /* Green color for success */
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 400px) {
+    .LoginBody {
+      width: 90%;
+      margin: 50px auto;
+    }
+  }

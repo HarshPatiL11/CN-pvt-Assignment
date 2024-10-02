@@ -12,6 +12,8 @@ const VALID_TOPICS = [
   "Marathi",
 ];
 
+
+
 // Add Questions
 export const addQuizQuestions = async (req, res) => {
   const { questionText, options, correctAnswer, topic } = req.body;
@@ -76,26 +78,66 @@ export const addQuizQuestions = async (req, res) => {
   }
 };
 
+//Get All Questions
+export const getAllQuestions = async (req, res) => {
+const isAdmin = req.isAdmin;
+
+  try {
+
+    if(!isAdmin){
+      res.status(401).send({
+        message:"Admin only",
+        success:false
+      })
+    }
+    const questions = await Questions.find();
+
+    if (!questions || questions.length === 0) {
+      return res.status(404).send({
+        success: false,
+        message: `No questions found for the Topic "${topic}"`,
+      });
+    }
+    return res.status(200).send({
+      success: true,
+      questions,
+      message: "Questions fetched successfully",
+    });
+  } catch (error) {
+    console.error("Error in getAllQuestions API:", error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in getAllQuestions API",
+      error: error.message,
+    });
+  }
+};
+
 // Get questions by topic
+// // Get questions by topic
 export const getQuizQuestionsByTopic = async (req, res) => {
   const { topic } = req.params;
 
   try {
     // Validate topic
-    if (!topic || !VALID_TOPICS.includes(topic)) {
+    if (!topic) {
       return res
         .status(404)
-        .send({ success: false, message: "Invalid or No Topic provided" });
+        .send({ success: false, message: "No Topic provided" });
     }
 
-    const questions = await Questions.find({ topic }).limit(10);
+    // Split the topics string into an array
+    const topicsArray = topic.split(',');
+
+    // Find questions for all topics
+    const questions = await Questions.find({ topic: { $in: topicsArray } }).limit(10);
 
     if (!questions || questions.length === 0) {
       return res
         .status(404)
         .send({
           success: false,
-          message: `No questions found for the Topic "${topic}"`,
+          message: `No questions found for the provided topics`,
         });
     }
 
@@ -113,6 +155,47 @@ export const getQuizQuestionsByTopic = async (req, res) => {
     });
   }
 };
+//getQuestionsByTokenAdmin
+
+
+  export const getQuestionsByTokenAdmin = async (req, res) => {
+    const { topic } = req.params;
+    const isAdmin = req.isAdmin;
+    
+    try {
+      if(!isAdmin){
+      return res.status(401).send({success:false,message:"UnAuthorised Token"})
+      }
+      // Validate topic
+      if (!topic || !VALID_TOPICS.includes(topic)) {
+        return res
+          .status(404)
+          .send({ success: false, message: "Invalid or No Topic provided" });
+      }
+
+      const questions = await Questions.find({topic});
+
+      if (!questions || questions.length === 0) {
+        return res.status(404).send({
+          success: false,
+          message: `No questions found for the Topic "${topic}"`,
+        });
+      }
+
+      return res.status(200).send({
+        success: true,
+        questions,
+        message: "Questions fetched successfully",
+      });
+    } catch (error) {
+      console.error("Error in getQuizQuestionsByTopic API:", error);
+      return res.status(500).send({
+        success: false,
+        message: "Error in getQuizQuestionsByTopic API",
+        error: error.message,
+      });
+    }
+  };
 
 // Calculate score
 export const calculateScore = async (req, res) => {
@@ -122,7 +205,6 @@ export const calculateScore = async (req, res) => {
   let score = 0;
 
   try {
-    // Validation for required fields
     if (
       !submittedAnswers ||
       !Array.isArray(submittedAnswers) ||
@@ -143,7 +225,6 @@ export const calculateScore = async (req, res) => {
         .json({ success: false, message: "userId is required" });
     }
 
-    // Using for...of to handle async/await properly
     for (const { questionId, answer } of submittedAnswers) {
       const question = await Questions.findById(questionId);
 
@@ -156,16 +237,13 @@ export const calculateScore = async (req, res) => {
           });
       }
 
-      // Compare submitted answer with the correct answer
       if (question.correctAnswer === answer) {
         score++;
       }
     }
 
-    // Update the user's score in the database
-    await User.findByIdAndUpdate(userId, { $inc: { score } }); // Increment score
+    await User.findByIdAndUpdate(userId, { $inc: { score } });
 
-    // Respond with the calculated score
     return res.json({
       success: true,
       message: "Score calculated successfully",
