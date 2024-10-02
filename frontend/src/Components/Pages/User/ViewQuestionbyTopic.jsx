@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Change to useNavigate
+import { useParams, useNavigate } from "react-router-dom"; 
 import axios from "axios";
 import { Radio, Button, message } from "antd";
 import "../../Css/AntdTable.css";
 
 const ViewQuestionsBYTopic = () => {
   const { topic } = useParams();
-  const navigate = useNavigate(); // Initialize navigate for navigation
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -43,7 +43,7 @@ const ViewQuestionsBYTopic = () => {
   };
 
   const handleSubmit = async () => {
-    // Validation: Check if all questions have been answered
+    // Validation Check if all questions have been answered
     if (Object.keys(selectedAnswers).length !== questions.length) {
       message.error("Please answer all questions before submitting.");
       return;
@@ -66,7 +66,6 @@ const ViewQuestionsBYTopic = () => {
       );
 
       if (response.data.success) {
-        // Redirect to score page with the score and answers
         navigate("/user/score", {
           state: { score: response.data.score, submittedAnswers, questions },
         });

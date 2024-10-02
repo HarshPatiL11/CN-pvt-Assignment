@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { FaTrashAlt } from "react-icons/fa"; // Import the trash icon
+import { FaTrashAlt } from "react-icons/fa";
 import "../../Css/AddQuestion.css";
 
 const AddQuestion = () => {
   const [formData, setFormData] = useState({
     question: "",
-    options: ["", ""], // Start with two empty options
+    options: ["", ""], 
     correctAnswer: "",
-    topic: "", // Persist topic
+    topic: "", 
   });
 
   const [error, setError] = useState({

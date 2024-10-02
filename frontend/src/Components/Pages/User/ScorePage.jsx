@@ -7,7 +7,7 @@ const ScorePage = () => {
   const { score, submittedAnswers, questions } = location.state || {};
 
   if (!location.state) {
-    return <div>No score data available.</div>; // Handle case where no data is available
+    return <div>No score data available.</div>;
   }
 
   return (

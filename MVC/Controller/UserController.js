@@ -105,7 +105,7 @@ export const loginUser = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "4h" }
     );
-    user.password = undefined; // Exclude password from response
+    user.password = undefined;
 
     return res.status(200).json({
       success: true,
@@ -183,10 +183,9 @@ export const selectTopics = async (req, res) => {
   }
 };
 
-
 // Get selected topics of a user
 export const getUserSelectedTopics = async (req, res) => {
-  const userId = req.userId; 
+  const userId = req.userId;
 
   try {
     if (!userId) {
@@ -219,7 +218,6 @@ export const getUserSelectedTopics = async (req, res) => {
   }
 };
 
-
 // Get score list by topic
 export const getScoreListByTopic = async (req, res) => {
   const { topic } = req.params;
@@ -246,37 +244,30 @@ export const getScoreListByTopic = async (req, res) => {
 
     // Check if users exist
     if (!users || users.length === 0) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: `No scores found for topic: ${topic}`,
-        });
+      return res.status(404).json({
+        success: false,
+        message: `No scores found for topic: ${topic}`,
+      });
     }
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        scores: users,
-        message: `Score list for the topic "${topic}" fetched successfully`,
-      });
+    res.status(200).json({
+      success: true,
+      scores: users,
+      message: `Score list for the topic "${topic}" fetched successfully`,
+    });
   } catch (error) {
     console.error("Error in getScoreListByTopic API:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error in getScoreListByTopic API",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Error in getScoreListByTopic API",
+      error: error.message,
+    });
   }
 };
 
-
 // Get selected topics and scores of a user
 export const getUserSelectedTopicsWithScores = async (req, res) => {
-  const userId = req.userId; 
+  const userId = req.userId;
 
   try {
     if (!userId) {
@@ -294,9 +285,9 @@ export const getUserSelectedTopicsWithScores = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    const selectedTopicsWithScores = user.selectedTopics.map(topic => ({
+    const selectedTopicsWithScores = user.selectedTopics.map((topic) => ({
       topic,
-      score: user.scores.get(topic) || 0 // Default to 0 if score not found
+      score: user.scores.get(topic) || 0,
     }));
 
     return res.status(200).json({

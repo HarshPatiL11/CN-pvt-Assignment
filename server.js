@@ -15,7 +15,7 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Replaces body-parser
+app.use(express.json()); 
 app.use(morgan("dev"));
 
 // Database connection

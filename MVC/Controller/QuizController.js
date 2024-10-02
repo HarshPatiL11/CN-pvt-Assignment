@@ -114,7 +114,6 @@ const isAdmin = req.isAdmin;
 };
 
 // Get questions by topic
-// // Get questions by topic
 export const getQuizQuestionsByTopic = async (req, res) => {
   const { topic } = req.params;
 

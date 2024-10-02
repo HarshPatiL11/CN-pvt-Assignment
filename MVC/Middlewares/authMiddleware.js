@@ -36,7 +36,7 @@ export const authMiddle = async (req, res, next) => {
       req.userId = user._id;
       req.isAdmin = user.isAdmin;
 
-      next(); // Proceed to the next middleware or controller
+      next(); 
     });
   } catch (error) {
     console.error("Authentication Middleware Error:", error);
