@@ -30,7 +30,7 @@ const TopicsPage = () => {
      }
      try {
        const { data } = await axios.get(
-         "http://localhost:8000/api/users/isadmin",
+         " https://quizinator-4whc.onrender.com/api/users/isadmin",
          {
            headers: { Authorization: `Bearer ${token}` },
          }

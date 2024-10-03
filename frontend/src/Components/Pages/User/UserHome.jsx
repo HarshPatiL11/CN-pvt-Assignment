@@ -26,7 +26,7 @@ const UserHome = () => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8000/api/users/get",
+          " https://quizinator-4whc.onrender.com/api/users/get",
           {
             headers: { Authorization: `Bearer ${token}` },
           }

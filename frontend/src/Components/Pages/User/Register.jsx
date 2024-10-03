@@ -48,7 +48,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/users/validate-email",
+        " https://quizinator-4whc.onrender.com/api/users/validate-email",
         { email }
       );
       if (response.status === 200) {
@@ -192,7 +192,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/users/register",
+        " https://quizinator-4whc.onrender.com/api/users/register",
         {
           name,
           email: userEmail,

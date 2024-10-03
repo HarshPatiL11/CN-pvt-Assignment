@@ -21,7 +21,7 @@ const ViewQuestionsBYTopic = () => {
     const fetchQuestions = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/questions/${topic}`,
+          `https://quizinator-4whc.onrender.com/api/questions/${topic}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -62,7 +62,7 @@ const ViewQuestionsBYTopic = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/questions/score`,
+        ` https://quizinator-4whc.onrender.com/api/questions/score`,
         { submittedAnswers, topic },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -71,7 +71,12 @@ const ViewQuestionsBYTopic = () => {
 
       if (response.data.success) {
         navigate("/user/score", {
-          state: { score: response.data.score, submittedAnswers, questions,topic },
+          state: {
+            score: response.data.score,
+            submittedAnswers,
+            questions,
+            topic,
+          },
         });
       } else {
         message.error("Failed to calculate score.");

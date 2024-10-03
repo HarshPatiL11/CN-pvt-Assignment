@@ -26,7 +26,7 @@ const UserTopics = () => {
     const fetchSelectedTopicsWithScores = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8000/api/users/topics/selectedWithScores",
+          " https://quizinator-4whc.onrender.com/api/users/topics/selectedWithScores",
           {
             headers: { Authorization: `Bearer ${token}` },
           }

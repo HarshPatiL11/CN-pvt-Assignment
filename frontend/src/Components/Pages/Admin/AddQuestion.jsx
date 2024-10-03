@@ -22,7 +22,7 @@ const AddQuestion = () => {
       }
       try {
         const { data } = await axios.get(
-          "http://localhost:8000/api/users/isadmin",
+          " https://quizinator-4whc.onrender.com/api/users/isadmin",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -199,9 +199,13 @@ const AddQuestion = () => {
     };
 
     try {
-      await axios.post("http://localhost:8000/api/questions/add", dataToSend, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        " https://quizinator-4whc.onrender.com/api/questions/add",
+        dataToSend,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       toast.success("Question added successfully");
 
       // Clear the form but keep the topic

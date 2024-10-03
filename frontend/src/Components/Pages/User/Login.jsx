@@ -108,18 +108,19 @@ const LoginPage = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/users/login",
+        " https://quizinator-4whc.onrender.com/api/users/login",
         { email, password }
       );
 
       const { token, user } = response.data;
       localStorage.setItem("token", token);
 
-      toast.success("Login successful!");
-
       if (user.isAdmin) {
-        navigate("/admin/manage-events");
+        navigate("/admin");
+        localStorage.removeItem("token");
+        toast.warning("User login only");
       } else {
+        toast.success("Login successful!");
         navigate("/");
       }
     } catch (error) {

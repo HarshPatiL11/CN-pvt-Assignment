@@ -20,7 +20,7 @@ const ViewQuestionsBYTopicAdmin = () => {
       }
       try {
         const { data } = await axios.get(
-          "http://localhost:8000/api/users/isadmin",
+          " https://quizinator-4whc.onrender.com/api/users/isadmin",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -48,7 +48,7 @@ const ViewQuestionsBYTopicAdmin = () => {
     const fetchQuestions = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/questions/${topic}/Admin`,
+          ` https://quizinator-4whc.onrender.com/api/questions/${topic}/Admin`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

@@ -50,7 +50,7 @@ const SelectTopics = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        "http://localhost:8000/api/users/topic/select",
+        " https://quizinator-4whc.onrender.com/api/users/topic/select",
         { topics: selectedTopics },
         {
           headers: {
