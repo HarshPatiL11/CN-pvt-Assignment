@@ -14,11 +14,13 @@ Cloning and Running the App
 To clone and run this app, follow these steps:
 
 First, clone the repository and navigate to the project directory. Then, run the command to install all necessary dependencies:
-npm install bcrypt bcryptjs body colors cors dotenv express jsonwebtoken mongoose morgan nodemon parser
+npm install bcrypt bcryptjs body colors cors dotenv express JSON web token mongoose morgan nodemon parser
 
-Next, create a .env file in the root directory and add the necessary environment variables, such as your PORT ,MongoDB URI and JWT secret.
+Next, create a .env file in the root directory and add the necessary environment variables, such as your PORT, MongoDB URI, and JWT secret.
 
-Finally, use Nodemon to start the server with the command : npm run server
+Finally, use Nodemon to start the server with the command: npm run server
+
+To set an Admin you will have to visit the database and set the isAdmin of the user you want to set as an Admin to "true"
 
 ==========================================================================================
 Frontend Setup
