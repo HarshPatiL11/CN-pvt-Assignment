@@ -253,14 +253,10 @@ export const selectTopics = async (req, res) => {
   try {
     // Validate inputs
     if (!userId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No userId provided" });
+      return res.status(400).json({ success: false, message: "No userId provided" });
     }
     if (!topics || !Array.isArray(topics)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid topics array provided" });
+      return res.status(400).json({ success: false, message: "Invalid topics array provided" });
     }
 
     // Check if selected topics are valid
@@ -273,9 +269,7 @@ export const selectTopics = async (req, res) => {
       "English",
       "Marathi",
     ];
-    const invalidTopics = topics.filter(
-      (topic) => !validTopics.includes(topic)
-    );
+    const invalidTopics = topics.filter((topic) => !validTopics.includes(topic));
 
     if (invalidTopics.length > 0) {
       return res.status(400).json({
@@ -286,15 +280,17 @@ export const selectTopics = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    await User.findByIdAndUpdate(userId, { selectedTopics: topics });
-    res
-      .status(200)
-      .json({ success: true, message: "Topics selected successfully" });
+    // Get existing topics
+    const existingTopics = user.selectedTopics || [];
+
+    // Update selected topics by adding/removing from existing topics
+    const updatedTopics = [...new Set([...existingTopics, ...topics])]; // Merge and remove duplicates
+
+    await User.findByIdAndUpdate(userId, { selectedTopics: updatedTopics });
+    res.status(200).json({ success: true, message: "Topics selected successfully", selectedTopics: updatedTopics });
   } catch (error) {
     console.error("Error in selectTopics API:", error);
     return res.status(500).json({
@@ -304,6 +300,7 @@ export const selectTopics = async (req, res) => {
     });
   }
 };
+
 
 // Get selected topics of a user
 export const getUserSelectedTopics = async (req, res) => {
