@@ -1,0 +1,91 @@
+.main-SelectTopicsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.SelectTopicsContainer {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px;
+}
+
+.SelectTopicsBody {
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.SelectTopicsBody h1 {
+  color: #b71c1c;
+}
+
+.checkbox-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.checkbox-container .ant-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  font-family: "Montserrat", Arial, sans-serif;
+  font-size: 18px;
+  color: #333;
+  padding: 10px;
+  transition: all 0.3s ease-in-out;
+  border-radius: 5px;
+}
+
+.checkbox-container .ant-checkbox-wrapper:hover,
+.checkbox-container .ant-checkbox-wrapper:focus-within {
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1px solid #ffa500;
+  box-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+  transform: scale(1.02);
+}
+
+.checkbox-container .ant-checkbox input {
+  margin-right: 10px;
+}
+
+.select-topics-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #b71c1c;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: "Montserrat", Arial, sans-serif;
+  transition: background-color 0.3s ease-in-out;
+  font-size: 16px;
+}
+
+.select-topics-btn:hover {
+  background-color: #a00000;
+}
+
+.loading-state {
+  font-size: 18px;
+  color: #555;
+}
+
+@media (max-width: 400px) {
+  .SelectTopicsBody {
+    width: 90%;
+  }
+
+  .checkbox-container .ant-checkbox-wrapper {
+    font-size: 16px;
+  }
+}

@@ -1,15 +1,51 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
+
 import { FaTrashAlt } from "react-icons/fa";
 import "../../Css/AddQuestion.css";
+import { GrPowerReset } from "react-icons/gr";
+import AdmNav from "../../Layouts/AdminNav";
+import Footer from "../../Layouts/Footer";
 
 const AddQuestion = () => {
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!token) {
+        toast.error("Unauthorized access. Please log in.");
+        navigate("/admin");
+        return;
+      }
+      try {
+        const { data } = await axios.get(
+          "http://localhost:8000/api/users/isadmin",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!data.isAdmin) {
+          toast.error("Unauthorized access.");
+          localStorage.removeItem("token");
+          navigate("/admin");
+        }
+      } catch (error) {
+        toast.error("Error verifying admin status. Please log in.");
+        navigate("/admin");
+      }
+    };
+
+    checkAdmin();
+  }, [navigate, token]);
+
   const [formData, setFormData] = useState({
     question: "",
-    options: ["", ""], 
+    options: ["", ""],
     correctAnswer: "",
-    topic: "", 
+    topic: "",
   });
 
   const [error, setError] = useState({
@@ -130,14 +166,42 @@ const AddQuestion = () => {
     setFormData((prev) => ({ ...prev, topic: "" }));
   };
 
+  const clearForm = () => {
+    setFormData({
+      question: "",
+      options: ["", ""],
+      correctAnswer: "",
+      topic: "",
+    });
+    setError({
+      questionError: null,
+      optionsError: null,
+      correctAnswerError: null,
+      generalError: null,
+    });
+    setValid({
+      isQuestionValid: false,
+      areOptionsValid: false,
+      isCorrectAnswerValid: false,
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateFields()) return;
 
+    // Change to match the server expectations
+    const dataToSend = {
+      questionText: formData.question, // Updated key
+      options: formData.options,
+      correctAnswer: formData.correctAnswer, // Updated key
+      topic: formData.topic,
+    };
+
     try {
-      await axios.post("http://localhost:8000/api/questions/add", formData, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+      await axios.post("http://localhost:8000/api/questions/add", dataToSend, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       toast.success("Question added successfully");
 
       // Clear the form but keep the topic
@@ -156,117 +220,137 @@ const AddQuestion = () => {
   };
 
   return (
-    <div className="AddQuestionContainer">
-      <div className="AddQuestionBody">
-        <h3>Add New Question</h3>
+    <>
+    <AdmNav/>
+      <div className="add-question-container">
+        <div className="add-question-body">
+          <h3>Add New Question</h3>
 
-        {error.generalError && (
-          <div className="error-message">{error.generalError}</div>
-        )}
+          {error.generalError && (
+            <div className="error-message">{error.generalError}</div>
+          )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <input
-              type="text"
-              placeholder="Question"
-              name="question"
-              value={formData.question}
-              onChange={handleChange}
-              className={
-                valid.isQuestionValid
-                  ? "input-valid"
-                  : error.questionError
-                  ? "input-invalid"
-                  : ""
-              }
-            />
-            {error.questionError && (
-              <div className="error-message">{error.questionError}</div>
-            )}
-          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="input-group add-question-input-group">
+              <input
+                type="text"
+                placeholder="Question"
+                name="question"
+                value={formData.question}
+                onChange={handleChange}
+                className={
+                  valid.isQuestionValid
+                    ? "input-valid"
+                    : error.questionError
+                    ? "input-invalid"
+                    : ""
+                }
+              />
+              {error.questionError && (
+                <div className="error-message">{error.questionError}</div>
+              )}
+            </div>
 
-          <div className="input-group">
-            <label>Options:</label>
-            {formData.options.map((option, index) => (
-              <div key={index} className="option-input-group">
-                <input
-                  type="text"
-                  placeholder={`Option ${index + 1}`}
-                  name="options"
-                  value={option}
-                  onChange={(e) => handleChange(e, index)}
-                  className={
-                    valid.areOptionsValid
-                      ? "input-valid"
-                      : error.optionsError
-                      ? "input-invalid"
-                      : ""
-                  }
-                />
-                {formData.options.length > 2 && (
-                  <FaTrashAlt
-                    className="trash-icon"
-                    onClick={() => removeOption(index)}
+            <div className="input-group add-question-input-group">
+              <label>Options:</label>
+              {formData.options.map((option, index) => (
+                <div key={index} className="option-input-group">
+                  <input
+                    type="text"
+                    placeholder={`Option ${index + 1}`}
+                    name="options"
+                    value={option}
+                    onChange={(e) => handleChange(e, index)}
+                    className={
+                      valid.areOptionsValid
+                        ? "input-valid"
+                        : error.optionsError
+                        ? "input-invalid"
+                        : ""
+                    }
                   />
-                )}
-              </div>
-            ))}
-            {error.optionsError && (
-              <div className="error-message">{error.optionsError}</div>
-            )}
-            <button type="button" onClick={addOption}>
-              Add Option
+                  {formData.options.length > 2 && (
+                    <FaTrashAlt
+                      className="trash-icon"
+                      onClick={() => removeOption(index)}
+                    />
+                  )}
+                </div>
+              ))}
+              {error.optionsError && (
+                <div className="error-message">{error.optionsError}</div>
+              )}
+              <button
+                type="button"
+                className="add-question-btn"
+                onClick={addOption}
+              >
+                Add Option
+              </button>
+            </div>
+
+            <div className="input-group add-question-input-group">
+              <input
+                type="text"
+                placeholder="Correct Answer"
+                name="correctAnswer"
+                value={formData.correctAnswer}
+                onChange={handleChange}
+                className={
+                  valid.isCorrectAnswerValid
+                    ? "input-valid"
+                    : error.correctAnswerError
+                    ? "input-invalid"
+                    : ""
+                }
+              />
+              {error.correctAnswerError && (
+                <div className="error-message">{error.correctAnswerError}</div>
+              )}
+            </div>
+
+            <div className="input-group add-question-input-group">
+              <select
+                name="topic"
+                value={formData.topic}
+                onChange={handleChange}
+                className={`topic-select ${
+                  formData.topic ? "input-valid" : ""
+                }`}
+              >
+                <option value="">Select a Topic</option>
+                <option value="Physics">Physics</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Biology">Biology</option>
+                <option value="I.T">I.T</option>
+                <option value="Maths">Maths</option>
+                <option value="English">English</option>
+                <option value="Marathi">Marathi</option>
+              </select>
+              <button
+                type="button"
+                className="clear-topic-btn"
+                onClick={clearTopic}
+              >
+                Clear Topic
+              </button>
+            </div>
+
+            <button type="submit" className="add-question-submit-btn">
+              Add Question
             </button>
-          </div>
-
-          <div className="input-group">
-            <input
-              type="text"
-              placeholder="Correct Answer"
-              name="correctAnswer"
-              value={formData.correctAnswer}
-              onChange={handleChange}
-              className={
-                valid.isCorrectAnswerValid
-                  ? "input-valid"
-                  : error.correctAnswerError
-                  ? "input-invalid"
-                  : ""
-              }
-            />
-            {error.correctAnswerError && (
-              <div className="error-message">{error.correctAnswerError}</div>
-            )}
-          </div>
-
-          <div className="input-group">
-            <select
-              name="topic"
-              value={formData.topic}
-              onChange={handleChange}
-              disabled={formData.topic !== ""}
-              className={formData.topic ? "input-valid" : ""}
+            <button
+              type="button"
+              className="add-question-submit-btn"
+              onClick={clearForm}
             >
-              <option value="">Select a Topic</option>
-              <option value="Physics">Physics</option>
-              <option value="Chemistry">Chemistry</option>
-              <option value="Biology">Biology</option>
-              <option value="I.T">I.T</option>
-              <option value="Maths">Maths</option>
-              <option value="English">English</option>
-              <option value="Marathi">Marathi</option>
-            </select>
-            <button type="button" onClick={clearTopic}>
-              Clear Topic
+              <GrPowerReset />
             </button>
-          </div>
-
-          <button type="submit" className="submit-btn">
-            Add Question
-          </button>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+      <Footer/>
+    </>
   );
 };
 

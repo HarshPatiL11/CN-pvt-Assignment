@@ -123,6 +123,128 @@ export const loginUser = async (req, res) => {
   }
 };
 
+// Admin login
+export const loginAdmin = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Validate email and password input
+    if (!email || typeof email !== "string") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Enter a valid Email" });
+    }
+    if (!password || typeof password !== "string") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Enter a valid Password" });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Check if the user is an admin
+    if (!user.isAdmin) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Access denied. Only admins can log in.",
+        });
+    }
+
+    // Compare passwords
+   
+    const isMatch = await comparePassword(password, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Incorrect password" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: "4h" }
+    );
+    user.password = undefined;
+
+    // Return success response with the token
+    return res.status(200).json({
+      success: true,
+      message: "Admin logged in successfully",
+      token,
+      user,
+    });
+  } catch (error) {
+    console.error("Error in loginAdmin API:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error in loginAdmin API",
+      error: error.message,
+    });
+  }
+};
+
+// get UserByToken
+export const getUserBytoken = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(400).send({ success: false, message: "No UserId" });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).send({ success: false, message: "No user" });
+    }
+    user.password = undefined;
+    res
+      .status(200)
+      .send({ succcess: true, message: "user Found", user });
+  } catch (error) {
+    error;
+    console.error(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in get userByID API ",
+      error,
+    });
+  }
+};
+
+
+// get UserTypeByToken
+export const getUserTypeBytoken = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(400).send({ success: false, message: "No UserId" });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).send({ success: false, message: "No user" });
+    }
+    res
+      .status(200)
+      .send({ succcess: true, message: "user Found", isAdmin: user.isAdmin });
+  } catch (error) {
+    error;
+    console.error(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in get userByID API ",
+      error,
+    });
+  }
+};
+
+
 // Select Topics for User
 export const selectTopics = async (req, res) => {
   const { topics } = req.body;
@@ -302,5 +424,68 @@ export const getUserSelectedTopicsWithScores = async (req, res) => {
       message: "Error in getUserSelectedTopics API",
       error: error.message,
     });
+  }
+};
+
+
+export const logout = async (req, res) => {
+  try {
+    // Clear the user's token from the client-side (not done here, but instruct on the client side)
+    // If you store any session information, clear it here.
+
+    res.status(200).send({
+      success: true,
+      message: "User logged out successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({
+      success: false,
+      message: "Error in logout API",
+      error,
+    });
+  }
+};
+
+
+export const submitAnswers = async (req, res) => {
+  const { submittedAnswers, topic } = req.body; // Extract topic from request body
+  const userId = req.userId; // Extract user ID from the request
+
+  try {
+    // Calculate the score based on submitted answers
+    let score = 0;
+
+    // Fetch questions based on submitted answers
+    const questions = await Question.find({
+      _id: { $in: submittedAnswers.map((ans) => ans.questionId) },
+    });
+
+    submittedAnswers.forEach((answer) => {
+      const question = questions.find(
+        (q) => q._id.toString() === answer.questionId
+      );
+      if (question && answer.answer === question.correctAnswer) {
+        score += 1; // Increment score for correct answers
+      }
+    });
+
+    // Update user's scores in the database
+    await User.findByIdAndUpdate(userId, {
+      $set: { [`scores.${topic}`]: score },
+    }); // Update user score for the specific topic
+
+    res
+      .status(200)
+      .json({ success: true, score, message: "Score updated successfully." });
+  } catch (error) {
+    console.error("Error in submitAnswers:", error);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error updating score.",
+        error: error.message,
+      });
   }
 };

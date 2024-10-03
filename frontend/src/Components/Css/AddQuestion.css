@@ -1,76 +1,65 @@
-/* Container that covers the full height of the screen */
-.AddQuestionContainer {
-  height: 87vh;
+.add-question-container {
+  height: 120vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f5f5f5; /* Light background */
+  padding: 50px auto;
+  background-color: #f5f5f5;
 }
 
-/* Main body of the AddQuestion box with glass card effect */
-.AddQuestionBody {
+.add-question-body {
   width: 450px;
   margin: 100px auto;
   padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Soft shadow */
-  backdrop-filter: blur(10px); /* Glass blur effect */
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   text-align: center;
 }
 
-/* Add Question heading */
-.AddQuestionBody h3 {
+.add-question-body h3 {
   font-family: "Montserrat", Arial, sans-serif;
-  color: #b71c1c; /* Red heading */
+  color: #b71c1c;
   margin-bottom: 20px;
 }
 
-/* Input group to control spacing */
-.input-group {
+.add-question-input-group {
   margin-bottom: 15px;
 }
 
-/* Default input field styling with red and white theme */
-input[type="text"],
-select,
-button {
+.add-question-input-group select {
   width: 100%;
   padding: 10px;
-  margin: 5px 0;
-  border: 1px solid rgba(255, 255, 255, 0.5); 
-  background-color: rgba(255, 255, 255, 0.8); 
-  color: #333;
+  border: 2px solid #ccc;
   border-radius: 4px;
-  box-sizing: border-box;
   font-family: "Montserrat", Arial, sans-serif;
-  transition: border 0.1s ease-in-out;
+  transition: border-color 0.3s ease-in-out;
+  margin-top: 10px;
 }
 
-/* Input field focus state - set border to orange */
-input[type="text"]:focus,
-select:focus {
-  border: 2px solid #ffa500 !important; /* Orange border on focus */
-  outline: none;
+.add-question-input-group select.input-valid {
+  border-color: #4caf50;
 }
 
-/* Input field with a green border for valid data */
+.add-question-input-group select.input-invalid {
+  border-color: #b71c1c;
+}
+
 .input-valid {
-  border: 2px solid #4caf50 !important; /* Green for valid input */
+  border: 2px solid #4caf50 !important;
 }
 
-/* Input field with a red border for invalid data */
 .input-invalid {
-  border: 2px solid #b71c1c !important; /* Red for invalid input */
+  border: 2px solid #b71c1c !important;
 }
 
-/* Button styling */
-.submit-btn,
-button[type="button"] {
+.add-question-submit-btn,
+.add-question-button[type="button"] {
   padding: 10px;
-  background-color: #b71c1c; /* Red button */
+  background-color: #b71c1c;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -80,51 +69,59 @@ button[type="button"] {
   margin-top: 10px;
 }
 
-/* Button hover effect */
-.submit-btn:hover,
-button[type="button"]:hover {
-  background-color: #a00000; /* Darker red on hover */
+.add-question-submit-btn:hover,
+.add-question-button[type="button"]:hover {
+  background-color: #a00000;
 }
 
-/* Error and success message styling */
-.error-message,
-.success-message {
+.add-question-error-message,
+.add-question-success-message {
   font-size: 14px;
   margin-bottom: 10px;
 }
 
-.error-message {
-  color: #b71c1c !important; /* Red color for error */
+.add-question-error-message {
+  color: #b71c1c !important;
 }
 
-.success-message {
-  color: #4caf50 !important; /* Green color for success */
+.add-question-success-message {
+  color: #4caf50 !important;
 }
 
-/* Option input group for adding/removing options */
 .option-input-group {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
 }
 
-/* Trash icon styling for removing options */
 .trash-icon {
   margin-left: 10px;
-  color: #b71c1c; /* Red trash icon */
+  color: #b71c1c;
   cursor: pointer;
   font-size: 18px;
   transition: color 0.3s ease-in-out;
 }
 
 .trash-icon:hover {
-  color: #a00000; /* Darker red on hover */
+  color: #a00000;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 400px) {
-  .AddQuestionBody {
+.clear-topic-btn {
+  background: none;
+  color: #b71c1c;
+  border: none;
+  cursor: pointer;
+  font-family: "Montserrat", Arial, sans-serif;
+  margin-left: 10px;
+  transition: color 0.3s ease-in-out;
+}
+
+.clear-topic-btn:hover {
+  color: #a00000;
+}
+
+@media (max-width: 600px) {
+  .add-question-body {
     width: 90%;
-    margin: 50px auto;
   }
 }

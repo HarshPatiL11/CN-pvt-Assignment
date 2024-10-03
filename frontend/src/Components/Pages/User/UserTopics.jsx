@@ -1,14 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Table } from "antd";
+import { Table, message } from "antd";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import axios from "axios";
 import "../../Css/AntdTable.css";
+import UserNav from "../../Layouts/UserNav";
+import Footer from "../../Layouts/Footer";
 
 const UserTopics = () => {
   const navigate = useNavigate();
   const [selectedTopics, setSelectedTopics] = useState([]);
+  const [checkLogin, setCheckLogin] = useState(false);
   const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!token) {
+      message.error("Unauthorized access. Please log in.");
+      navigate("/user/login");
+    } else {
+      setCheckLogin(true);
+    }
+  }, [token, navigate]);
 
   useEffect(() => {
     const fetchSelectedTopicsWithScores = async () => {
@@ -29,8 +41,10 @@ const UserTopics = () => {
       }
     };
 
-    fetchSelectedTopicsWithScores();
-  }, [token]);
+    if (checkLogin) {
+      fetchSelectedTopicsWithScores();
+    }
+  }, [token, checkLogin]);
 
   const handleViewQuestions = (topic) => {
     navigate(`/user/questions/${topic}`);
@@ -67,10 +81,24 @@ const UserTopics = () => {
   }));
 
   return (
-    <div className="table-container">
-      <h1>User Quiz Topics and Scores</h1>
-      <Table columns={columns} dataSource={dataSource} pagination={false} />
-    </div>
+    <>
+      <UserNav />
+      <div className="main-container">
+        <div className="table-container">
+          <h1>User Quiz Topics and Scores</h1>
+          {checkLogin ? (
+            <Table
+              columns={columns}
+              dataSource={dataSource}
+              pagination={false}
+            />
+          ) : (
+            <p>Loading...</p>
+          )}
+        </div>
+      </div>
+      <Footer />
+    </>
   );
 };
 

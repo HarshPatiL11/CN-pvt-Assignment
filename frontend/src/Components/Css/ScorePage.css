@@ -1,0 +1,39 @@
+.score-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.score-title {
+  color: #D8232A;
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.topic-title {
+  color: #D8232A;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: #D8232A;
+}
+
+.ant-list-item {
+  margin-bottom: 10px;
+}
+
+.ant-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}

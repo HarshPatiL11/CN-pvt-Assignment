@@ -3,10 +3,10 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../../Css/Login.css";
-import UserNav from "../../Layouts/UserNav";
+import AdmNav from "../../Layouts/AdminNav";
 import Footer from "../../Layouts/Footer";
 
-const LoginPage = () => {
+const AdminLoginPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -108,19 +108,24 @@ const LoginPage = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/users/login",
+        "http://localhost:8000/api/users/admin/login",
         { email, password }
       );
 
       const { token, user } = response.data;
       localStorage.setItem("token", token);
 
-      toast.success("Login successful!");
+      toast.success("Admin login successful!");
 
       if (user.isAdmin) {
-        navigate("/admin/manage-events");
+        navigate("/admin/topics");
       } else {
-        navigate("/");
+        toast.error("Access denied: You are not an admin.");
+        setError({
+          emailError: "",
+          passwordError: "",
+          generalError: "You must be an admin to access this page.",
+        });
       }
     } catch (error) {
       if (error.response) {
@@ -170,11 +175,11 @@ const LoginPage = () => {
 
   return (
     <>
-      <UserNav />
+      <AdmNav />
       <div className="LoginContainer">
         <div className="loginHeader"></div>
         <div className="LoginBody">
-          <h3>Login</h3>
+          <h3>Admin Login</h3>
 
           {error.generalError && (
             <div className="error-message">{error.generalError}</div>
@@ -220,7 +225,7 @@ const LoginPage = () => {
               )}
             </div>
             <button type="submit" className="login-btn">
-              Login
+              Admin Login
             </button>
           </form>
         </div>
@@ -230,4 +235,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default AdminLoginPage;

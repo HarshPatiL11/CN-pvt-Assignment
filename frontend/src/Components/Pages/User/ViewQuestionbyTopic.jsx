@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; 
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Radio, Button, message } from "antd";
-import "../../Css/AntdTable.css";
+import { Radio, Button, message, Pagination } from "antd";
+import "../../Css/AntdTable.css"; // Assuming you have base CSS here
+import "../../Css/ViewQuestionsBYTopic.css"; // New CSS file for this component
+import UserNav from "../../Layouts/UserNav";
+import Footer from "../../Layouts/Footer";
 
 const ViewQuestionsBYTopic = () => {
   const { topic } = useParams();
@@ -11,6 +14,7 @@ const ViewQuestionsBYTopic = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [currentIndex, setCurrentIndex] = useState(1);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -59,7 +63,7 @@ const ViewQuestionsBYTopic = () => {
     try {
       const response = await axios.post(
         `http://localhost:8000/api/questions/score`,
-        { submittedAnswers },
+        { submittedAnswers, topic },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -67,7 +71,7 @@ const ViewQuestionsBYTopic = () => {
 
       if (response.data.success) {
         navigate("/user/score", {
-          state: { score: response.data.score, submittedAnswers, questions },
+          state: { score: response.data.score, submittedAnswers, questions,topic },
         });
       } else {
         message.error("Failed to calculate score.");
@@ -75,6 +79,10 @@ const ViewQuestionsBYTopic = () => {
     } catch (err) {
       message.error("Error submitting answers. Please try again.");
     }
+  };
+
+  const handlePaginationChange = (page) => {
+    setCurrentIndex(page);
   };
 
   if (loading) {
@@ -85,40 +93,56 @@ const ViewQuestionsBYTopic = () => {
     return <div>{error}</div>;
   }
 
+  const currentQuestion = questions[currentIndex - 1];
+
   return (
-    <div className="table-container">
-      <h1>Questions for {topic}</h1>
-      {questions.length > 0 ? (
-        <div>
-          {questions.map((question) => (
-            <div key={question._id} style={{ marginBottom: "20px" }}>
-              <p>{question.questionText}</p>
+    <>
+      <UserNav />
+
+      <div className="main-view-container">
+        <div className="view-questions-container">
+          <h1 className="view-questions-title">Questions for {topic}</h1>
+          {currentQuestion ? (
+            <div className="question-card">
+              <p className="question-text">
+                {currentIndex}) {currentQuestion.questionText} (1 mark)
+              </p>
               <Radio.Group
                 onChange={(e) =>
-                  handleAnswerChange(question._id, e.target.value)
+                  handleAnswerChange(currentQuestion._id, e.target.value)
                 }
-                value={selectedAnswers[question._id]}
+                value={selectedAnswers[currentQuestion._id]}
               >
-                {question.options.map((option, index) => (
-                  <Radio key={index} value={option}>
+                {currentQuestion.options.map((option, index) => (
+                  <Radio key={index} value={option} className="question-option">
                     {option}
                   </Radio>
                 ))}
               </Radio.Group>
             </div>
-          ))}
-          <Button
-            type="primary"
-            onClick={handleSubmit}
-            style={{ marginTop: "20px" }}
-          >
-            Submit Answers
-          </Button>
+          ) : (
+            <p>No questions available for this topic.</p>
+          )}
+          <Pagination
+            current={currentIndex}
+            total={questions.length}
+            pageSize={1}
+            onChange={handlePaginationChange}
+            style={{ marginTop: "20px", textAlign: "center" }}
+          />
+          {questions.length > 0 && (
+            <Button
+              type="primary"
+              onClick={handleSubmit}
+              style={{ marginTop: "20px" }}
+            >
+              Submit Answers
+            </Button>
+          )}
         </div>
-      ) : (
-        <p>No questions available for this topic.</p>
-      )}
-    </div>
+      </div>
+      <Footer/>
+    </>
   );
 };
 

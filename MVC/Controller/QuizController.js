@@ -196,9 +196,8 @@ export const getQuizQuestionsByTopic = async (req, res) => {
     }
   };
 
-// Calculate score
 export const calculateScore = async (req, res) => {
-  const { submittedAnswers } = req.body;
+  const { submittedAnswers, topic } = req.body; // Get topic from request
   const userId = req.userId;
 
   let score = 0;
@@ -209,13 +208,10 @@ export const calculateScore = async (req, res) => {
       !Array.isArray(submittedAnswers) ||
       submittedAnswers.length === 0
     ) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "submittedAnswers is required and should be a non-empty array",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "submittedAnswers is required and should be a non-empty array",
+      });
     }
 
     if (!userId) {
@@ -228,12 +224,10 @@ export const calculateScore = async (req, res) => {
       const question = await Questions.findById(questionId);
 
       if (!question) {
-        return res
-          .status(404)
-          .json({
-            success: false,
-            message: `Question not found for id: ${questionId}`,
-          });
+        return res.status(404).json({
+          success: false,
+          message: `Question not found for id: ${questionId}`,
+        });
       }
 
       if (question.correctAnswer === answer) {
@@ -241,7 +235,10 @@ export const calculateScore = async (req, res) => {
       }
     }
 
-    await User.findByIdAndUpdate(userId, { $inc: { score } });
+    // Update the user's score for the specific topic
+    await User.findByIdAndUpdate(userId, {
+      $inc: { [`scores.${topic}`]: score }, // Increment score for the topic
+    });
 
     return res.json({
       success: true,
@@ -250,12 +247,10 @@ export const calculateScore = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in calculateScore API:", error);
-    return res
-      .status(500)
-      .send({
-        success: false,
-        message: "Error in calculateScore API",
-        error: error.message,
-      });
+    return res.status(500).send({
+      success: false,
+      message: "Error in calculateScore API",
+      error: error.message,
+    });
   }
 };

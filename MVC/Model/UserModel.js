@@ -18,10 +18,10 @@ const userSchema = new mongoose.Schema(
     selectedTopics: {
       type: [String],
       default: [],
-    }, 
+    },
     scores: {
       type: Map, 
-      of: Number, 
+      of: Number,
       default: {},
     },
     isAdmin: {

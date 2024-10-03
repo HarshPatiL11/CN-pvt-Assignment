@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../../Css/Login.css";
+import UserNav from "../../Layouts/UserNav";
+import Footer from "../../Layouts/Footer";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -220,100 +222,108 @@ const Register = () => {
   };
 
   return (
-    <div className="LoginContainer">
-      <div className="loginHeader"></div>
-      <div className="LoginBody">
-        <h3>Register</h3>
+    <>
+    <UserNav/>
+      <div className="LoginContainer">
+        <div className="loginHeader"></div>
+        <div className="LoginBody">
+          <h3>Register</h3>
 
-        {error.generalError && (
-          <div className="error-message">{error.generalError}</div>
-        )}
+          {error.generalError && (
+            <div className="error-message">{error.generalError}</div>
+          )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <input
-              type="text"
-              placeholder="Name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className={
-                valid.isNameValid
-                  ? "input-valid"
-                  : error.nameError
-                  ? "input-invalid"
-                  : ""
-              }
-            />
-            {error.nameError && (
-              <div className="error-message">{error.nameError}</div>
-            )}
-          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder="Name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className={
+                  valid.isNameValid
+                    ? "input-valid"
+                    : error.nameError
+                    ? "input-invalid"
+                    : ""
+                }
+              />
+              {error.nameError && (
+                <div className="error-message">{error.nameError}</div>
+              )}
+            </div>
 
-          <div className="input-group">
-            <input
-              type="email"
-              placeholder="Email"
-              name="userEmail"
-              value={formData.userEmail}
-              onChange={handleChange}
-              className={
-                valid.isEmailValid
-                  ? "input-valid"
-                  : error.emailError
-                  ? "input-invalid"
-                  : ""
-              }
-            />
-            {error.emailError && (
-              <div className="error-message">{error.emailError}</div>
-            )}
-          </div>
+            <div className="input-group">
+              <input
+                type="email"
+                placeholder="Email"
+                name="userEmail"
+                value={formData.userEmail}
+                onChange={handleChange}
+                className={
+                  valid.isEmailValid
+                    ? "input-valid"
+                    : error.emailError
+                    ? "input-invalid"
+                    : ""
+                }
+              />
+              {error.emailError && (
+                <div className="error-message">{error.emailError}</div>
+              )}
+            </div>
 
-          <div className="input-group">
-            <input
-              type="password"
-              placeholder="Password"
-              name="userPassword"
-              value={formData.userPassword}
-              onChange={handleChange}
-              className={
-                valid.isPasswordValid
-                  ? "input-valid"
-                  : error.passwordError
-                  ? "input-invalid"
-                  : ""
-              }
-            />
-            {error.passwordError && (
-              <div className="error-message">{error.passwordError}</div>
-            )}
-          </div>
+            <div className="input-group">
+              <input
+                type="password"
+                placeholder="Password"
+                name="userPassword"
+                value={formData.userPassword}
+                onChange={handleChange}
+                className={
+                  valid.isPasswordValid
+                    ? "input-valid"
+                    : error.passwordError
+                    ? "input-invalid"
+                    : ""
+                }
+              />
+              {error.passwordError && (
+                <div className="error-message">{error.passwordError}</div>
+              )}
+            </div>
 
-          <div className="input-group">
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className={
-                valid.isConfirmPasswordValid
-                  ? "input-valid"
-                  : error.confirmPasswordError
-                  ? "input-invalid"
-                  : ""  
-              }
-            />
-            {error.confirmPasswordError && (
-              <div className="error-message">{error.confirmPasswordError}</div>
-            )}
-          </div>
+            <div className="input-group">
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className={
+                  valid.isConfirmPasswordValid
+                    ? "input-valid"
+                    : error.confirmPasswordError
+                    ? "input-invalid"
+                    : ""
+                }
+              />
+              {error.confirmPasswordError && (
+                <div className="error-message">
+                  {error.confirmPasswordError}
+                </div>
+              )}
+            </div>
 
-          <button type="submit" className="login-btn">Register</button>
-        </form>
+            <button type="submit" className="login-btn">
+              Register
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+      <Footer/>
+    </>
   );
 };
 
